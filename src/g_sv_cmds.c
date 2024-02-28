@@ -486,7 +486,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *
     }
     if (mode == SAY_TEAM)
     {
-        Com_sprintf(v16, sizeof(v16), "%s(\x14%s\x15)%s%s: ", buf, teamname, name, "^7");
+        Com_sprintf(v16, sizeof(v16), "%s\x15%s%s: ", buf, teamname, name, "^7");
     }
     else if (mode == SAY_TELL)
     {
