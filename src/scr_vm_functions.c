@@ -2793,7 +2793,7 @@ void PlayerCmd_GetPmFlags(scr_entref_t object)
     gentity_t* gentity;
     int entityNum = 0;
 
-    if(arg.classnum){
+    if(object.classnum){
 
         Scr_ObjectError("Not an entity");
         return;
@@ -2801,7 +2801,7 @@ void PlayerCmd_GetPmFlags(scr_entref_t object)
     }else
     {
 
-        entityNum = arg.entnum;
+        entityNum = object.entnum;
         gentity = &g_entities[entityNum];
 
         if(!gentity->client){
@@ -2809,8 +2809,6 @@ void PlayerCmd_GetPmFlags(scr_entref_t object)
             return;
         }
     }
-
-    gentity = &g_entities[object.entnum];
 
     Scr_AddInt(gentity->client->ps.pm_flags);
 }
