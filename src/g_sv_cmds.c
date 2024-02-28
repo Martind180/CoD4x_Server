@@ -475,7 +475,7 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *
     {
         teamcolor = "^9";
     }
-    if (ent->client->sess.cs.team == TEAM_SPECTATOR)
+    if (ent->client->sess.cs.team == TEAM_SPECTATOR || ent->client->sess.cs.team == TEAM_RED)
     {
         Com_sprintf(buf, sizeof(buf), "\x15(\x14GAME_SPECTATOR\x15)");
     }
