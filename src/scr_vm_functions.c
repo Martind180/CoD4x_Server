@@ -2785,6 +2785,36 @@ void ScrCmd_SetStance(scr_entref_t arg){
 }
 */
 
+void PlayerCmd_GetPmFlags(scr_entref_t object)
+{
+    if (Scr_GetNumParam())
+        Scr_Error("Usage: <client> GetPmFlags()\n");
+
+    gentity_t* gentity;
+    int entityNum = 0;
+
+    if(arg.classnum){
+
+        Scr_ObjectError("Not an entity");
+        return;
+
+    }else
+    {
+
+        entityNum = arg.entnum;
+        gentity = &g_entities[entityNum];
+
+        if(!gentity->client){
+            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
+            return;
+        }
+    }
+
+    gentity = &g_entities[object.entnum];
+
+    Scr_AddInt(gentity->client->ps.pm_flags);
+}
+
 void PlayerCmd_ForwardButtonPressed(scr_entref_t object)
 {
     if (Scr_GetNumParam())
