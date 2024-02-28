@@ -570,7 +570,7 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
         }
         else
         {
-            teamname = g_TeamName_Allies->string;
+            teamname = "";
         }
         color = COLOR_CYAN;
         break;
