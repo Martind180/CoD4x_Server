@@ -481,14 +481,8 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *
     }
     else
     {
-        if (ent->client->sess.sessionState)
-        {
-            Com_sprintf(buf, sizeof(buf), "\x15%s(\x14GAME_DEAD\x15)", teamcolor);
-        }
-        else
-        {
-            Com_sprintf(buf, sizeof(buf), "\x15%s", teamcolor);
-        }
+        Com_sprintf(buf, sizeof(buf), "\x15%s", teamcolor);
+        
     }
     if (mode == SAY_TEAM)
     {
@@ -626,9 +620,9 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
         const int c1 = isAttack ? 1 : 0;
         const int c2 = isAttack ? 34 : (isDefence ? 33 : 0);
         if(com_ansiColor && com_ansiColor->integer) {
-            Com_Printf(CON_CHANNEL_SERVER,"\033[%d;%dm%s%s%s\033[0m: %s\n", c1, c2, isPlaying ? "" : "(Dead)", mode == SAY_ALL ? "" : (isAttack ? "(Attack)" : "(Defence)"), name, text);
+            Com_Printf(CON_CHANNEL_SERVER,"\033[%d;%dm%s%s%s\033[0m: %s\n", c1, c2, "", mode == SAY_ALL ? "" : (isAttack ? "(Attack)" : "(Defence)"), name, text);
         } else {
-            Com_Printf(CON_CHANNEL_SERVER,"%s%s%s: %s\n", isPlaying ? "" : "(Dead)", mode == SAY_ALL ? "" : (isAttack ? "(Attack)" : "(Defence)"), name, text);
+            Com_Printf(CON_CHANNEL_SERVER,"%s%s%s: %s\n", "", mode == SAY_ALL ? "" : (isAttack ? "(Attack)" : "(Defence)"), name, text);
         }
     } else {
         Com_Printf(CON_CHANNEL_SERVER, "Say %s: %s\n", name, text);

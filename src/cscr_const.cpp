@@ -21,7 +21,7 @@ extern "C" void __cdecl GScr_LoadConsts()
   scr_const.crouch = GScr_AllocString("crouch");
   scr_const.current = GScr_AllocString("current");
   scr_const.damage = GScr_AllocString("damage");
-  scr_const.dead = GScr_AllocString("dead");
+  scr_const.dead = GScr_AllocString("");
   scr_const.death = GScr_AllocString("death");
   scr_const.detonate = GScr_AllocString("detonate");
   scr_const.direct = GScr_AllocString("direct");

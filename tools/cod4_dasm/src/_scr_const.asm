@@ -616,7 +616,7 @@ _cstring_confirm_location:		db "confirm_location",0
 _cstring_crouch:		db "crouch",0
 _cstring_current:		db "current",0
 _cstring_damage:		db "damage",0
-_cstring_dead:		db "dead",0
+_cstring_dead:		db "",0
 _cstring_death:		db "death",0
 _cstring_detonate:		db "detonate",0
 _cstring_direct:		db "direct",0

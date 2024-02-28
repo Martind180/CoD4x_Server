@@ -6251,7 +6251,7 @@ _cstring_ui_expression_er4:		db "UI Expression Error: Expected at least 1 parame
 _cstring_error_rank_must_:		db "Error: rank must be > 0: %i",0ah,0
 _cstring_ui_expression_er5:		db "UI Expression Error: Expected at least 1 parameter to max()",0ah,0
 _cstring_otherteamname:		db "otherteamname",0
-_cstring_dead:		db "dead",0
+_cstring_dead:		db "",0
 _cstring_player_s___i:		db "player( %s ) = %i",0ah,0
 _cstring_error_trying_to_:		db "Error: trying to negate a string: %s",0ah,0
 _cstring_clipammo:		db "clipAmmo",0
