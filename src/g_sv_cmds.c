@@ -454,15 +454,15 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *
     {
         return;
     }
-    if (mode == SAY_TEAM && !OnSameTeam(ent, other))
-    {
-        return;
-    }
+    // if (mode == SAY_TEAM && !OnSameTeam(ent, other))
+    // {
+    //     return;
+    // }
 
-    if (ent->client->sess.sessionState != SESS_STATE_PLAYING && other->client->sess.sessionState == SESS_STATE_PLAYING && !g_deadChat->boolean)
-    {
-        return;
-    }
+    // if (ent->client->sess.sessionState != SESS_STATE_PLAYING && other->client->sess.sessionState == SESS_STATE_PLAYING && !g_deadChat->boolean)
+    // {
+    //     return;
+    // }
     if (ent->client->sess.cs.team == TEAM_FREE || ent->client->sess.cs.team == TEAM_SPECTATOR)
     {
         teamcolor = "";
