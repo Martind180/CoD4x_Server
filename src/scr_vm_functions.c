@@ -2813,6 +2813,34 @@ void PlayerCmd_GetPmFlags(scr_entref_t object)
     Scr_AddInt(gentity->client->ps.pm_flags);
 }
 
+void PlayerCmd_GetJumpTime(scr_entref_t object)
+{
+    if (Scr_GetNumParam())
+        Scr_Error("Usage: <client> GetJumpTime()\n");
+
+    gentity_t* gentity;
+    int entityNum = 0;
+
+    if(object.classnum){
+
+        Scr_ObjectError("Not an entity");
+        return;
+
+    }else
+    {
+
+        entityNum = object.entnum;
+        gentity = &g_entities[entityNum];
+
+        if(!gentity->client){
+            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
+            return;
+        }
+    }
+
+    Scr_AddInt(gentity->client->ps.jumpTime);
+}
+
 void PlayerCmd_ForwardButtonPressed(scr_entref_t object)
 {
     if (Scr_GetNumParam())
