@@ -46,10 +46,9 @@
 #include "tomcrypt/tomcrypt_misc.h"
 
 static qboolean g_isLocStringPrecached[MAX_LOCALIZEDSTRINGS] = {qfalse};
-extern char* var_typename[];
+extern char *var_typename[];
 
-
-extern char* var_typename[];
+extern char *var_typename[];
 
 /*
 ============
@@ -64,7 +63,7 @@ Usage: int = self getUid();
 void PlayerCmd_GetUid(scr_entref_t arg)
 {
 
-    Com_PrintError(CON_CHANNEL_SCRIPT,"Removed script function getuid called");
+    Com_PrintError(CON_CHANNEL_SCRIPT, "Removed script function getuid called");
     Scr_AddInt(0);
 }
 
@@ -305,7 +304,7 @@ Usage: int = self setUid(uid <integer>);
 
 void PlayerCmd_SetUid(scr_entref_t arg)
 {
-    Com_PrintError(CON_CHANNEL_SCRIPT,"Removed script function setuid called");
+    Com_PrintError(CON_CHANNEL_SCRIPT, "Removed script function setuid called");
     Scr_AddInt(0);
 }
 
@@ -637,7 +636,7 @@ undergoes will affect the player. Setting it back to 0 (worldspawn)
 should disable all further effects.
 
 Usage:	self SetGroundReferenceEnt( <other entity id> );
-		self SetGroundReferenceEnt( other GetEntityNumber() );
+        self SetGroundReferenceEnt( other GetEntityNumber() );
 ============
 */
 void PlayerCmd_SetGroundReferenceEnt(scr_entref_t arg)
@@ -684,10 +683,10 @@ void PlayerCmd_SetGroundReferenceEnt(scr_entref_t arg)
     }
 
     /*
-	if( !groundRefEnt->inuse ){
-		Scr_ObjectError(va("SetGroundReferenceEnt: entity %i does not exist", otherEntityNum));
-		return;
-	}
+    if( !groundRefEnt->inuse ){
+        Scr_ObjectError(va("SetGroundReferenceEnt: entity %i does not exist", otherEntityNum));
+        return;
+    }
 */
 
     gentity->s.groundEntityNum = otherEntityNum;
@@ -803,7 +802,8 @@ resolves country from IP address
 ============
 */
 
-typedef enum {
+typedef enum
+{
     SCR_GEOIP_CODE,
     SCR_GEOIP_CODE3,
     SCR_GEOIP_COUNTRYNAME,
@@ -874,12 +874,14 @@ void PlayerCmd_GetGeoLocation(scr_entref_t arg)
     Scr_AddString(countryname);
 }
 
-void PlayerCmd_Usercall(scr_entref_t arg) {
+void PlayerCmd_Usercall(scr_entref_t arg)
+{
     gentity_t *gentity;
     int entityNum = 0;
     mvabuf;
 
-    if (arg.classnum) {
+    if (arg.classnum)
+    {
         Scr_ObjectError("Not an entity");
         return;
     }
@@ -887,25 +889,29 @@ void PlayerCmd_Usercall(scr_entref_t arg) {
     entityNum = arg.entnum;
     gentity = &g_entities[entityNum];
 
-    if (!gentity->client) {
+    if (!gentity->client)
+    {
         Scr_ObjectError(va("Entity: %i is not a player", entityNum));
         return;
     }
 
-    if (Scr_GetNumParam() < 1) {
+    if (Scr_GetNumParam() < 1)
+    {
         Scr_Error("Usage: self usercall(<syscall_name>, ...)\n");
         return;
     }
-    char* methodName = Scr_GetString(0);
+    char *methodName = Scr_GetString(0);
     PHandler_Event(PLUGINS_ONSCRUSERCALLMETHOD, methodName, entityNum);
 }
 
-void Scr_Usercall() {
-    if (Scr_GetNumParam() < 1) {
+void Scr_Usercall()
+{
+    if (Scr_GetNumParam() < 1)
+    {
         Scr_Error("Usage: usercall(<syscall_name>, ...)\n");
         return;
     }
-    char* functionName = Scr_GetString(0);
+    char *functionName = Scr_GetString(0);
     PHandler_Event(PLUGINS_ONSCRUSERCALLFUNCTION, functionName);
 }
 
@@ -1088,12 +1094,12 @@ void GScr_StrTokByPixLen()
         {
             if (lineBreakIndex >= MAX_LINEBREAKS)
             {
-                break; //Cut here - no overrun
+                break; // Cut here - no overrun
             }
             if (lWSHalfPixelCounter >= maxHalfPixel / 3)
-            {                          //we have a space between words inside the upper half string length
-                *lastWordSpace = 0;    //terminate it
-                Scr_AddString(string); //setting the beginning of string in our array
+            {                          // we have a space between words inside the upper half string length
+                *lastWordSpace = 0;    // terminate it
+                Scr_AddString(string); // setting the beginning of string in our array
                 Scr_AddArray();
 
                 string = &lastWordSpace[1];
@@ -1102,8 +1108,8 @@ void GScr_StrTokByPixLen()
                 halfPixelCounter = 0;
             }
             else
-            {                     //we couln't find a space inside the upper half string length
-                *countstring = 0; //Mhh it is complicated to seperate the complete string here. We will just thrash one character
+            {                     // we couln't find a space inside the upper half string length
+                *countstring = 0; // Mhh it is complicated to seperate the complete string here. We will just thrash one character
                 Scr_AddString(string);
                 Scr_AddArray();
 
@@ -1197,13 +1203,13 @@ void GScr_StrTokByLen()
         {
             if (lineBreakIndex >= MAX_LINEBREAKS)
             {
-                break; //Cut here - no overrun
+                break; // Cut here - no overrun
             }
 
             if (lSCounterReal >= (limit / 2))
-            { //we have a space between words inside the upper half string length
+            { // we have a space between words inside the upper half string length
                 outputstr[lSCounter + 2] = 0;
-                Scr_AddString(outputstr); //setting the beginning of string in our array
+                Scr_AddString(outputstr); // setting the beginning of string in our array
                 Scr_AddArray();
 
                 inputstr = &inputstr[lSCounter + 1];
@@ -1219,8 +1225,8 @@ void GScr_StrTokByLen()
                 j = 0;
             }
             else
-            {                         //we couln't find a space inside the upper half string length
-                outputstr[i + 2] = 0; //Exception if broken inside colorcode is needed
+            {                         // we couln't find a space inside the upper half string length
+                outputstr[i + 2] = 0; // Exception if broken inside colorcode is needed
                 Scr_AddString(outputstr);
                 Scr_AddArray();
 
@@ -1441,7 +1447,9 @@ void GScr_StrColorStrip()
         if (string[i] == '^' && string[i + 1] >= '0' && string[i + 1] <= '9')
         {
             ++i;
-        }else{
+        }
+        else
+        {
             buffer[j] = string[i];
             ++j;
         }
@@ -1479,7 +1487,6 @@ void GScr_StrRepl()
     Scr_AddString(buffer);
 }
 
-
 /*
 ============
 GScr_Pow
@@ -1492,7 +1499,7 @@ Usage: float = pow(base <float>, exponent <float>);
 void GScr_Pow()
 {
     float base, exponent;
-    
+
     if (Scr_GetNumParam() != 2)
     {
         Scr_Error("Usage: pow(<float> ,<float>)");
@@ -1501,7 +1508,7 @@ void GScr_Pow()
 
     base = Scr_GetFloat(0);
     exponent = Scr_GetFloat(1);
-    
+
     Scr_AddFloat(powf(base, exponent));
 }
 
@@ -1699,7 +1706,7 @@ void GScr_FS_FOpen()
 
     if (!fh)
     {
-        Com_DPrintf(CON_CHANNEL_SCRIPT,"Scr_FS_FOpen() failed\n");
+        Com_DPrintf(CON_CHANNEL_SCRIPT, "Scr_FS_FOpen() failed\n");
     }
     Scr_AddInt(fh);
 }
@@ -1841,7 +1848,7 @@ void GScr_FS_WriteLine()
 
     if (!ret)
     {
-        Com_DPrintf(CON_CHANNEL_SCRIPT,"^2Scr_FS_WriteLine() failed\n");
+        Com_DPrintf(CON_CHANNEL_SCRIPT, "^2Scr_FS_WriteLine() failed\n");
         Scr_AddBool(qfalse);
     }
     else
@@ -1904,7 +1911,7 @@ void GScr_FS_InitParamList(){
     char* filename;
     qboolean type;
     int i;
-	mvabuf;
+    mvabuf;
 
     if(Scr_GetNumParam() != 2)
         Scr_Error("FS_InitParamList(string <filename>, bool <indexed_list>)\n");
@@ -1964,10 +1971,11 @@ void GScr_FS_InitParamList(){
 
 */
 
-//static int scr_fopencount;
-//static int scr_fileHandles[MAX_SCRIPT_FILEHANDLES];
+// static int scr_fopencount;
+// static int scr_fileHandles[MAX_SCRIPT_FILEHANDLES];
 
-typedef union {
+typedef union
+{
     int step;
     byte cbyte;
 } paramlist_index_t;
@@ -2037,38 +2045,38 @@ Usage: entity = AddTestClient()
 
 void GScr_SpawnBot()
 {
-	gentity_t *clEnt;
-	
-	if ( Scr_GetNumParam() == 1 )
-        {
-       	 	char *string = Scr_GetString( 0 );
-		char name[36];
-		int i, j;
-		
-		for( i = 0, j = 0; string[i] && j < sizeof(name) - 1; ++i )
-		{
-			if( (byte)string[i] >= 0x20 )
-			{
-				name[j] = string[i];
-				++j;
-			}
-		}
-		name[j] = '\0';
-		
-		if ( strlen( name ) < 3 )
-		{
-			Scr_Error( "AddTestClient(): Name must be atleast 3 characters long\n" );
-		}
-		
-		clEnt = (gentity_t *)SV_AddBotClient( name );
-        }
-	else
-	{
-		clEnt = (gentity_t *)SV_AddBotClient( NULL );
-	}
+    gentity_t *clEnt;
 
-        if (clEnt)
-            	Scr_AddEntity(clEnt);
+    if (Scr_GetNumParam() == 1)
+    {
+        char *string = Scr_GetString(0);
+        char name[36];
+        int i, j;
+
+        for (i = 0, j = 0; string[i] && j < sizeof(name) - 1; ++i)
+        {
+            if ((byte)string[i] >= 0x20)
+            {
+                name[j] = string[i];
+                ++j;
+            }
+        }
+        name[j] = '\0';
+
+        if (strlen(name) < 3)
+        {
+            Scr_Error("AddTestClient(): Name must be atleast 3 characters long\n");
+        }
+
+        clEnt = (gentity_t *)SV_AddBotClient(name);
+    }
+    else
+    {
+        clEnt = (gentity_t *)SV_AddBotClient(NULL);
+    }
+
+    if (clEnt)
+        Scr_AddEntity(clEnt);
 }
 
 /*
@@ -2182,11 +2190,10 @@ void PlayerCmd_spawn(scr_entref_t arg)
     ClientSpawn(gentity, position, direction);
 }
 
-
 void GScr_NewHudElem()
 {
     game_hudelem_t *element = HudElem_Alloc(1023, 0);
-    if(element)
+    if (element)
     {
         Scr_AddHudElem(element);
         return;
@@ -2203,7 +2210,7 @@ void GScr_NewClientHudElem()
         Scr_ParamError(0, "GScr_NewClientHudElem: Entity is not a client");
     }
     game_hudelem_t *element = HudElem_Alloc(ent->s.number, 0);
-    if(element)
+    if (element)
     {
         Scr_AddHudElem(element);
         return;
@@ -2258,7 +2265,7 @@ void HECmd_SetText(scr_entref_t entnum)
     game_hudelem_t *element = &g_hudelems[entnum.entnum];
 
     int cs_index = element->elem.text;
-	
+
     HudElem_ClearTypeSettings(element);
 
     /* Must be set to 0 before calling Scr_CanFreeLocalizedConfigString() */
@@ -2268,53 +2275,53 @@ void HECmd_SetText(scr_entref_t entnum)
     if (Scr_CanFreeLocalizedConfigString(cs_index))
         SV_SetConfigstring(cs_index + CS_LOCALIZEDSTRINGS, "");
 
-    Scr_ConstructMessageString(0, Scr_GetNumParam() -1, "Hud Elem String", buffer, sizeof(buffer));
+    Scr_ConstructMessageString(0, Scr_GetNumParam() - 1, "Hud Elem String", buffer, sizeof(buffer));
     element->elem.type = HE_TYPE_TEXT;
     element->elem.text = G_LocalizedStringIndex(buffer);
 }
 
 void HECmd_SetPulseFX(scr_entref_t hud_elem_num)
 {
-	game_hudelem_t *hudelem_t = NULL;
-	int speed;
-	int decayStart;
-	int decayDuration;
+    game_hudelem_t *hudelem_t = NULL;
+    int speed;
+    int decayStart;
+    int decayDuration;
 
-	if (Scr_GetNumParam() != 3)
-		Scr_Error("USAGE: <hudelem> SetPulseFX( <speed>, <decayStart>, <decayDuration> );");
+    if (Scr_GetNumParam() != 3)
+        Scr_Error("USAGE: <hudelem> SetPulseFX( <speed>, <decayStart>, <decayDuration> );");
 
-	if (hud_elem_num.classnum != 1)
-	{
-		Scr_ObjectError("not a hud element");
-		return;
-	}
-	hudelem_t = &g_hudelems[hud_elem_num.entnum];
+    if (hud_elem_num.classnum != 1)
+    {
+        Scr_ObjectError("not a hud element");
+        return;
+    }
+    hudelem_t = &g_hudelems[hud_elem_num.entnum];
 
-	speed = Scr_GetInt(0);
-	if (speed < 0)
-	{
-		Scr_ParamError(0, va("Time (%i) must be greater than zero.", speed));
-		return;
-	}
+    speed = Scr_GetInt(0);
+    if (speed < 0)
+    {
+        Scr_ParamError(0, va("Time (%i) must be greater than zero.", speed));
+        return;
+    }
 
-	decayStart = Scr_GetInt(1);
-	if (decayStart < 0)
-	{
-		Scr_ParamError(0, va("Time (%i) must be greater than zero.", decayStart));
-		return;
-	}
+    decayStart = Scr_GetInt(1);
+    if (decayStart < 0)
+    {
+        Scr_ParamError(0, va("Time (%i) must be greater than zero.", decayStart));
+        return;
+    }
 
-	decayDuration = Scr_GetInt(2);
-	if (decayDuration < 0)
-	{
-		Scr_ParamError(0, va("Time (%i) must be greater than zero.", decayDuration));
-		return;
-	}
+    decayDuration = Scr_GetInt(2);
+    if (decayDuration < 0)
+    {
+        Scr_ParamError(0, va("Time (%i) must be greater than zero.", decayDuration));
+        return;
+    }
 
-	hudelem_t->elem.fxBirthTime = level.time;
-	hudelem_t->elem.fxLetterTime = speed;
-	hudelem_t->elem.fxDecayStartTime = decayStart;
-	hudelem_t->elem.fxDecayDuration = decayDuration;
+    hudelem_t->elem.fxBirthTime = level.time;
+    hudelem_t->elem.fxLetterTime = speed;
+    hudelem_t->elem.fxDecayStartTime = decayStart;
+    hudelem_t->elem.fxDecayDuration = decayDuration;
 }
 
 void HECmd_ScaleOverTime(scr_entref_t hud_elem_num)
@@ -2622,7 +2629,6 @@ void GScr_Spawn()
     }
 }
 
-
 void GScr_SpawnHelicopter()
 {
     const char *vehicleInfoName;
@@ -2663,7 +2669,7 @@ const char *Scr_GetPlayername(gentity_t *gent)
 {
     if (gent->s.number < 0 || gent->s.number >= MAX_CLIENTS)
     {
-        Com_PrintError(CON_CHANNEL_SCRIPT,"Scr_GetPlayername() Bad entity\n");
+        Com_PrintError(CON_CHANNEL_SCRIPT, "Scr_GetPlayername() Bad entity\n");
         return "";
     }
     return svs.clients[gent->s.number].name;
@@ -2673,41 +2679,41 @@ const char *Scr_GetPlayername(gentity_t *gent)
 void GScr_SpawnVehicle()
 {
 
-	int spawnflags;
-	gentity_t *gentity;
-	vec3_t origin;
-	char vehTypeStr[MAX_QPATH];
-	char vehModel[MAX_QPATH];
+    int spawnflags;
+    gentity_t *gentity;
+    vec3_t origin;
+    char vehTypeStr[MAX_QPATH];
+    char vehModel[MAX_QPATH];
 
-	Scr_GetVector(0, origin);
+    Scr_GetVector(0, origin);
 
-	if ( Scr_GetNumParam() != 4 )
-	{
-		Scr_Error("Usage: spawnvehicle <origin>, <spawnflags>, <vehicletype>, <xmodel>");
-		return;
-	}
+    if ( Scr_GetNumParam() != 4 )
+    {
+        Scr_Error("Usage: spawnvehicle <origin>, <spawnflags>, <vehicletype>, <xmodel>");
+        return;
+    }
 
-	spawnflags = Scr_GetInt(1);
+    spawnflags = Scr_GetInt(1);
 
-	gentity = G_Spawn();
+    gentity = G_Spawn();
 
-	Scr_SetString((unsigned short*)&gentity->classname, (unsigned short)stringIndex.script_vehicle);
+    Scr_SetString((unsigned short*)&gentity->classname, (unsigned short)stringIndex.script_vehicle);
 
-	gentity->r.currentOrigin[0] = origin[0];
-	gentity->r.currentOrigin[1] = origin[1];
-	gentity->r.currentOrigin[2] = origin[2];
+    gentity->r.currentOrigin[0] = origin[0];
+    gentity->r.currentOrigin[1] = origin[1];
+    gentity->r.currentOrigin[2] = origin[2];
 
-	gentity->spawnflags = spawnflags;
+    gentity->spawnflags = spawnflags;
 
         Q_strncpyz(vehTypeStr, Scr_GetString(2), sizeof(vehTypeStr));
         Q_strncpyz(vehModel, Scr_GetString(3), sizeof(vehModel));
 
         G_SetModel(gentity, vehModel);
 //	G_VehCollmapSpawner( gentity );
-	SpawnVehicle( gentity, vehTypeStr );
+    SpawnVehicle( gentity, vehTypeStr );
 //	gentity->s.eType = 12;
 //	gentity->r.contents = 0x2080;
-	Scr_AddEntity( gentity );
+    Scr_AddEntity( gentity );
 }
 */
 
@@ -2767,15 +2773,15 @@ void ScrCmd_SetStance(scr_entref_t arg){
 
     if(strindex == scr_const.prone){
 
-	gentity->client->ps.stance = 1;
+    gentity->client->ps.stance = 1;
 
     }else if(strindex == scr_const.crouch){
 
-	gentity->client->ps.stance = 2;
+    gentity->client->ps.stance = 2;
 
     }else if(strindex == scr_const.stand){
 
-	gentity->client->ps.stance = 3;
+    gentity->client->ps.stance = 3;
 
     }else{
 
@@ -2790,21 +2796,23 @@ void PlayerCmd_GetPmFlags(scr_entref_t object)
     if (Scr_GetNumParam())
         Scr_Error("Usage: <client> GetPmFlags()\n");
 
-    gentity_t* gentity;
+    gentity_t *gentity;
     int entityNum = 0;
 
-    if(object.classnum){
+    if (object.classnum)
+    {
 
         Scr_ObjectError("Not an entity");
         return;
-
-    }else
+    }
+    else
     {
 
         entityNum = object.entnum;
         gentity = &g_entities[entityNum];
 
-        if(!gentity->client){
+        if (!gentity->client)
+        {
             Scr_ObjectError(va("Entity: %i is not a player", entityNum));
             return;
         }
@@ -2818,27 +2826,59 @@ void PlayerCmd_GetJumpTime(scr_entref_t object)
     if (Scr_GetNumParam())
         Scr_Error("Usage: <client> GetJumpTime()\n");
 
-    gentity_t* gentity;
+    gentity_t *gentity;
     int entityNum = 0;
 
-    if(object.classnum){
+    if (object.classnum)
+    {
 
         Scr_ObjectError("Not an entity");
         return;
-
-    }else
+    }
+    else
     {
 
         entityNum = object.entnum;
         gentity = &g_entities[entityNum];
 
-        if(!gentity->client){
+        if (!gentity->client)
+        {
             Scr_ObjectError(va("Entity: %i is not a player", entityNum));
             return;
         }
     }
 
     Scr_AddInt(gentity->client->ps.jumpTime);
+}
+
+void PlayerCmd_GetJumpOriginZ(scr_entref_t object)
+{
+    if (Scr_GetNumParam())
+        Scr_Error("Usage: <client> GetJumpOriginZ()\n");
+
+    gentity_t *gentity;
+    int entityNum = 0;
+
+    if (object.classnum)
+    {
+
+        Scr_ObjectError("Not an entity");
+        return;
+    }
+    else
+    {
+
+        entityNum = object.entnum;
+        gentity = &g_entities[entityNum];
+
+        if (!gentity->client)
+        {
+            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
+            return;
+        }
+    }
+
+    Scr_AddFloat(gentity->client->ps.jumpOriginZ);
 }
 
 void PlayerCmd_ForwardButtonPressed(scr_entref_t object)
@@ -3059,7 +3099,7 @@ static void PlayerCmd_GetSteamGroupMembershipCallback(int clientnum, uint64_t st
 
     if (oldserverid != currentsvbaseid || clientnum < 0 || clientnum >= sv_maxclients->integer)
     {
-        return; //Server restarted or changed game/map --> VM state has changed
+        return; // Server restarted or changed game/map --> VM state has changed
     }
 
     Scr_AddBool(m_bOfficer);
@@ -3168,7 +3208,6 @@ void Scr_IsArray_f()
     Scr_AddBool(Scr_GetType(0) == 1 ? qtrue : qfalse);
 }
 
-
 /* GetTagInfoForEntity
  *
  *
@@ -3183,9 +3222,9 @@ qboolean GScr_UpdateTagInternal2(gentity_t *ent, unsigned int tagName, cached_ta
     // Checked if latest requested tag is the same as previous - just return from function.
     // Find tag origin otherwise.
 
-    if ( ent->s.number == cachedTag->entnum && level.time == cachedTag->time && tagName == cachedTag->name )
+    if (ent->s.number == cachedTag->entnum && level.time == cachedTag->time && tagName == cachedTag->name)
     {
-            return qtrue;
+        return qtrue;
     }
 
     if (SV_DObjExists(ent))
@@ -3197,7 +3236,8 @@ qboolean GScr_UpdateTagInternal2(gentity_t *ent, unsigned int tagName, cached_ta
             Scr_SetString(&cachedTag->name, tagName);
             return qtrue;
         }
-        if (showScriptError){
+        if (showScriptError)
+        {
             SV_DObjDumpInfo(ent);
         }
     }
@@ -3207,37 +3247,37 @@ qboolean GScr_UpdateTagInternal2(gentity_t *ent, unsigned int tagName, cached_ta
 void PlayerCmd_GetSpectatorClient(scr_entref_t arg)
 {
     gentity_t *gentity = NULL;
-    int entityNum = 0;		
-    mvabuf;		
-		
-    if (arg.classnum)		
-    {		
-        Scr_ObjectError("Not an entity");		
-    }		
-    else		
-    {		
+    int entityNum = 0;
+    mvabuf;
+
+    if (arg.classnum)
+    {
+        Scr_ObjectError("Not an entity");
+    }
+    else
+    {
         entityNum = arg.entnum;
-        gentity = &g_entities[entityNum];		
-		
-        if (!gentity->client)		
-        {		
-            Scr_ObjectError(va("Entity: %i is not a player", entityNum));		
-        }		
-    }		
-    if (Scr_GetNumParam())		
-    {		
-        Scr_Error("Usage: self getSpectatorClient()\n");		
-    }		
-		
-    // Player isn't spectating anyone.		
-    if (gentity->client->spectatorClient == -1)		
-    {		
-        Scr_AddUndefined();		
-    }		
-    else		
-    {		
-        Scr_AddEntity(&g_entities[gentity->client->spectatorClient]);		
-    }		
+        gentity = &g_entities[entityNum];
+
+        if (!gentity->client)
+        {
+            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
+        }
+    }
+    if (Scr_GetNumParam())
+    {
+        Scr_Error("Usage: self getSpectatorClient()\n");
+    }
+
+    // Player isn't spectating anyone.
+    if (gentity->client->spectatorClient == -1)
+    {
+        Scr_AddUndefined();
+    }
+    else
+    {
+        Scr_AddEntity(&g_entities[gentity->client->spectatorClient]);
+    }
 }
 
 void PlayerCmd_SetVelocity(scr_entref_t arg)
@@ -3264,20 +3304,16 @@ void GScr_ArrayTest()
 {
     // Does nothing for now.
     // To be implemented with other script function name.
-    //Scr_GetArrayId(0);
+    // Scr_GetArrayId(0);
 }
-
 
 void ScrCmd_LogString(scr_entref_t arg)
 {
-
 }
 
 void Scr_LogString()
 {
-
 }
-
 
 void __cdecl PlayerCmd_GetXuid(scr_entref_t arg)
 {
@@ -3299,7 +3335,7 @@ void __cdecl PlayerCmd_GetXuid(scr_entref_t arg)
         pSelf = &g_entities[arg.entnum];
     }
 
-    if ( pSelf->client )
+    if (pSelf->client)
     {
         Com_sprintf(svcmd, sizeof(svcmd), "%llx", SV_GetPlayerXuid(pSelf->client->sess.cs.clientIndex));
         Scr_AddString(svcmd);
@@ -3318,9 +3354,9 @@ void GScr_Base64Encode()
         return;
     }
 
-    char* toEncode = Scr_GetString(0);
+    char *toEncode = Scr_GetString(0);
     unsigned long encodedLen = sizeof(encoded);
-    base64_encode((byte*)toEncode, strlen(toEncode), (byte*)encoded, &encodedLen);
+    base64_encode((byte *)toEncode, strlen(toEncode), (byte *)encoded, &encodedLen);
     encoded[sizeof(encoded) - 1] = '\0';
     Scr_AddString(encoded);
 }
@@ -3334,9 +3370,9 @@ void GScr_Base64Decode()
         return;
     }
 
-    char* toDecode = Scr_GetString(0);
+    char *toDecode = Scr_GetString(0);
     unsigned long decodedLen = sizeof(decoded);
-    base64_decode((byte*)toDecode, strlen(toDecode), (byte*)decoded, &decodedLen);
+    base64_decode((byte *)toDecode, strlen(toDecode), (byte *)decoded, &decodedLen);
     decoded[sizeof(decoded) - 1] = '\0';
     Scr_AddString(decoded);
 }
@@ -3413,9 +3449,9 @@ void GScr_Float()
         Scr_AddFloat(1.0 * Scr_GetInt(0));
     else if (varType == 2)
     {
-        char* strFloat = Scr_GetString(0);
+        char *strFloat = Scr_GetString(0);
         double result = 0.0;
-        if ( isdigit(strFloat[0]) || (strFloat[0] == '-' && isdigit(strFloat[1])))
+        if (isdigit(strFloat[0]) || (strFloat[0] == '-' && isdigit(strFloat[1])))
             result = atof(strFloat);
         Scr_AddFloat((float)result);
     }
@@ -3432,7 +3468,7 @@ void GScr_CloneBrushModelToScriptModel(scr_entref_t scriptModelEntNum)
         Scr_Error("usage: <scriptModelEnt> CloneBrushModelToScriptModel(<brushModelEnt>)");
 
     // Object checks.
-    gentity_t* scriptEnt = VM_GetGEntityForNum(scriptModelEntNum);
+    gentity_t *scriptEnt = VM_GetGEntityForNum(scriptModelEntNum);
     if (scriptEnt->classname != (unsigned short)scr_const.script_model)
         Scr_ObjectError("passed entity is not a script_model entity");
 
@@ -3440,7 +3476,7 @@ void GScr_CloneBrushModelToScriptModel(scr_entref_t scriptModelEntNum)
         Scr_ObjectError("passed entity type is not 6 (TODO: what is it?)");
 
     // Arguments checks.
-    gentity_t* brushEnt = Scr_GetEntity(0);
+    gentity_t *brushEnt = Scr_GetEntity(0);
     if (brushEnt->classname != (unsigned short)scr_const.script_brushmodel && brushEnt->classname != (unsigned short)scr_const.script_model && brushEnt->classname != (unsigned short)scr_const.script_origin && brushEnt->classname != (unsigned short)scr_const.light)
         Scr_ParamError(0, "brush model entity classname must be one of {script_brushmodel, script_model, script_origin, light}");
 
@@ -3459,10 +3495,10 @@ void GScr_CloneBrushModelToScriptModel(scr_entref_t scriptModelEntNum)
 void PlayerCmd_SetStance(scr_entref_t playerEntNum)
 {
     if (Scr_GetNumParam() != 1)
-    Scr_Error("usage: <client> setStance(<string stance>);");
+        Scr_Error("usage: <client> setStance(<string stance>);");
 
     // Object check.
-    gclient_t* cl = VM_GetGClientForEntityNumber(playerEntNum);
+    gclient_t *cl = VM_GetGClientForEntityNumber(playerEntNum);
     if (!cl)
         Scr_ObjectError("entity is not a client");
 
@@ -3471,108 +3507,105 @@ void PlayerCmd_SetStance(scr_entref_t playerEntNum)
     if (stanceIdx != (unsigned short)scr_const.stand && stanceIdx != (unsigned short)scr_const.crouch && stanceIdx != (unsigned short)scr_const.prone)
         Scr_ParamError(0, "stance must be one of {stand, crouch, prone}");
 
-    BGEvent event = stanceIdx == (unsigned short)scr_const.stand ? EV_STANCE_FORCE_STAND : stanceIdx == (unsigned short)scr_const.crouch ? EV_STANCE_FORCE_CROUCH : EV_STANCE_FORCE_PRONE;
+    BGEvent event = stanceIdx == (unsigned short)scr_const.stand ? EV_STANCE_FORCE_STAND : stanceIdx == (unsigned short)scr_const.crouch ? EV_STANCE_FORCE_CROUCH
+                                                                                                                                         : EV_STANCE_FORCE_PRONE;
     BG_AddPredictableEventToPlayerstate(event, 0, cl);
 }
 
-
-
 void GScr_Print3D()
 {
-  signed int duration;
-  vec3_t origin;
-  vec3_t rgb;
-  float scale;
-  vec4_t color;
-  const char *text;
+    signed int duration;
+    vec3_t origin;
+    vec3_t rgb;
+    float scale;
+    vec4_t color;
+    const char *text;
 
-  duration = 1;
-  scale = 1.0;
-  color[0] = 1.0;
-  color[1] = 1.0;
-  color[2] = 1.0;
-  color[3] = 1.0;
-  switch ( Scr_GetNumParam( ) )
-  {
+    duration = 1;
+    scale = 1.0;
+    color[0] = 1.0;
+    color[1] = 1.0;
+    color[2] = 1.0;
+    color[3] = 1.0;
+    switch (Scr_GetNumParam())
+    {
     case 6u:
-      duration = Scr_GetInt(5u);
+        duration = Scr_GetInt(5u);
     case 5u:
-      scale = Scr_GetFloat(4u);
+        scale = Scr_GetFloat(4u);
     case 4u:
-      color[3] = Scr_GetFloat(3u);
+        color[3] = Scr_GetFloat(3u);
     case 3u:
-      Scr_GetVector(2u, rgb);
-      VectorCopy(rgb, color);
+        Scr_GetVector(2u, rgb);
+        VectorCopy(rgb, color);
     case 2u:
-      text = Scr_GetString(1u);
-      Scr_GetVector(0, origin);
-      CL_AddDebugString(origin, color, scale, text, duration);
-      break;
+        text = Scr_GetString(1u);
+        Scr_GetVector(0, origin);
+        CL_AddDebugString(origin, color, scale, text, duration);
+        break;
     default:
-      Scr_Error("illegal call to print3d()");
-      break;
-  }
+        Scr_Error("illegal call to print3d()");
+        break;
+    }
 }
 
-//printstar(<point>, <starcolor>, <staralpha>, <duration>, <text>, <textcolor>, <textalpha>, <textscale>);
+// printstar(<point>, <starcolor>, <staralpha>, <duration>, <text>, <textcolor>, <textalpha>, <textscale>);
 
 void GScr_PrintDebugStar()
 {
-  signed int duration;
-  vec3_t point;
-  vec3_t rgb;
-  float scale;
-  vec4_t starColor, textColor;
-  const char *text;
+    signed int duration;
+    vec3_t point;
+    vec3_t rgb;
+    float scale;
+    vec4_t starColor, textColor;
+    const char *text;
 
-  duration = 1;
-  scale = 1.0;
-  text = NULL;
-  starColor[0] = 1.0;
-  starColor[1] = 1.0;
-  starColor[2] = 1.0;
-  starColor[3] = 1.0;
+    duration = 1;
+    scale = 1.0;
+    text = NULL;
+    starColor[0] = 1.0;
+    starColor[1] = 1.0;
+    starColor[2] = 1.0;
+    starColor[3] = 1.0;
 
-  textColor[0] = 1.0;
-  textColor[1] = 1.0;
-  textColor[2] = 1.0;
-  textColor[3] = 1.0;
+    textColor[0] = 1.0;
+    textColor[1] = 1.0;
+    textColor[2] = 1.0;
+    textColor[3] = 1.0;
 
-  switch ( Scr_GetNumParam( ) )
-  {
+    switch (Scr_GetNumParam())
+    {
 
     case 8u:
-      scale = Scr_GetFloat(7u);
+        scale = Scr_GetFloat(7u);
 
     case 7u:
-      textColor[3] = Scr_GetFloat(6u);
+        textColor[3] = Scr_GetFloat(6u);
     case 6u:
-      Scr_GetVector(5u, rgb);
-      VectorCopy(rgb, textColor);
-
+        Scr_GetVector(5u, rgb);
+        VectorCopy(rgb, textColor);
 
     case 5u:
-      text = Scr_GetString(4u);
+        text = Scr_GetString(4u);
 
     case 4u:
-      duration = Scr_GetInt(3u);
+        duration = Scr_GetInt(3u);
 
     case 3u:
-      starColor[3] = Scr_GetFloat(2u);
+        starColor[3] = Scr_GetFloat(2u);
     case 2u:
-      Scr_GetVector(1u, rgb);
-      VectorCopy(rgb, starColor);
+        Scr_GetVector(1u, rgb);
+        VectorCopy(rgb, starColor);
 
     case 1u:
-      Scr_GetVector(0, point);
-      CL_AddDebugStarWithText(point, starColor, textColor, text, scale, duration);
-      break;
+        Scr_GetVector(0, point);
+        CL_AddDebugStarWithText(point, starColor, textColor, text, scale, duration);
+        break;
     default:
-      Scr_Error("illegal call to printstar()");
-      break;
-  }
+        Scr_Error("illegal call to printstar()");
+        break;
+    }
 }
-
 
 void EntityCmd_GetHandlerType(scr_entref_t arg)
 {
@@ -3596,70 +3629,69 @@ void EntityCmd_GetHandlerType(scr_entref_t arg)
     Scr_AddInt(gentity->handler);
 }
 
-
 void GScr_StrCtrlStrip()
 {
-	if( Scr_GetNumParam() != 1 )
-	{
-		Scr_Error( "Usage: string = StrCtrlStrip ( <string> )" );
-	}
+    if (Scr_GetNumParam() != 1)
+    {
+        Scr_Error("Usage: string = StrCtrlStrip ( <string> )");
+    }
 
-	char *string = Scr_GetString( 0 );
-	char buffer[ 1024 ];
-	
-	int i, j;
-	for( i = 0, j = 0; string[ i ]; ++i )
-	{
-		if( (byte)string[ i ] >= 0x20 )
-		{
-			buffer[ j ] = string[ i ];
-			++j;
-		}
-	}
-	buffer[ j ] = '\0';
-	
-	Scr_AddString( buffer );
+    char *string = Scr_GetString(0);
+    char buffer[1024];
+
+    int i, j;
+    for (i = 0, j = 0; string[i]; ++i)
+    {
+        if ((byte)string[i] >= 0x20)
+        {
+            buffer[j] = string[i];
+            ++j;
+        }
+    }
+    buffer[j] = '\0';
+
+    Scr_AddString(buffer);
 }
 
 void GScr_ToUpper()
 {
-	if( Scr_GetNumParam() != 1 )
-	{
-		Scr_Error( "Usage: string = ToUpper ( <string> )" );
-	}
+    if (Scr_GetNumParam() != 1)
+    {
+        Scr_Error("Usage: string = ToUpper ( <string> )");
+    }
 
-	char *string = Scr_GetString( 0 );
-	char buffer[ 1024 ];
-	
-	int i;
-	for( i = 0; string[ i ]; ++i )
-	{
-		if ( (byte)string[ i ] > 0x60 && (byte)string[ i ] < 0x7B )
-			buffer[ i ] = (char)( (byte)string[ i ] & 0x5F );
-		else
-			buffer[ i ] = string[ i ];
-	}
-	buffer[ i ] = '\0';
-	
-	Scr_AddString( buffer );
+    char *string = Scr_GetString(0);
+    char buffer[1024];
+
+    int i;
+    for (i = 0; string[i]; ++i)
+    {
+        if ((byte)string[i] > 0x60 && (byte)string[i] < 0x7B)
+            buffer[i] = (char)((byte)string[i] & 0x5F);
+        else
+            buffer[i] = string[i];
+    }
+    buffer[i] = '\0';
+
+    Scr_AddString(buffer);
 }
 
-int GScr_FetchAndReplaceInternal(const char* argnum, char* output, int maxoutlen)
+int GScr_FetchAndReplaceInternal(const char *argnum, char *output, int maxoutlen)
 {
-    if(!isInteger(argnum, 1))
+    if (!isInteger(argnum, 1))
     {
         Scr_ParamError(0, "strreplace expects an integer after && or expects escaping by useing \\& instead.");
     }
     int arg = atoi(argnum);
-    if(arg == 0)
+    if (arg == 0)
     {
         Scr_ParamError(0, "strreplace expects an integer after && which is in range between 1 and 9.");
     }
-    if( Scr_GetNumParam() < arg +1 )
-	{
+    if (Scr_GetNumParam() < arg + 1)
+    {
         Scr_ParamError(0, "strreplace expects as many additional arguments as your integer after && says so.");
     }
-    const char* s = Scr_GetString(arg);
+    const char *s = Scr_GetString(arg);
     Q_strncpyz(output, s, maxoutlen);
     return strlen(s);
 }
@@ -3669,29 +3701,29 @@ void GScr_StrReplace()
     char assemblybuf[1024];
     int assemblypos = 0;
     int srcpos = 0;
-    char argnum[2] = { 0 };
+    char argnum[2] = {0};
 
-	if( Scr_GetNumParam() < 1 )
-	{
-		Scr_Error( "Usage: string =  strreplace( <string>, <string>,...)" );
-	}
-
-    char *mainstring = Scr_GetString( 0 );
-    while(mainstring[srcpos] != 0)
+    if (Scr_GetNumParam() < 1)
     {
-        if(mainstring[srcpos] == '&' && mainstring[srcpos+1] == '&' && mainstring[srcpos+2] != 0)
+        Scr_Error("Usage: string =  strreplace( <string>, <string>,...)");
+    }
+
+    char *mainstring = Scr_GetString(0);
+    while (mainstring[srcpos] != 0)
+    {
+        if (mainstring[srcpos] == '&' && mainstring[srcpos + 1] == '&' && mainstring[srcpos + 2] != 0)
         {
-            argnum[0] = mainstring[srcpos+2];
-            assemblypos += GScr_FetchAndReplaceInternal(argnum, assemblybuf + assemblypos, sizeof(assemblybuf) - (assemblypos +1));
+            argnum[0] = mainstring[srcpos + 2];
+            assemblypos += GScr_FetchAndReplaceInternal(argnum, assemblybuf + assemblypos, sizeof(assemblybuf) - (assemblypos + 1));
             srcpos += 3;
             continue;
         }
-        //Escaping
-        if(mainstring[srcpos] == '\\' && mainstring[srcpos+1] == '&')
+        // Escaping
+        if (mainstring[srcpos] == '\\' && mainstring[srcpos + 1] == '&')
         {
             srcpos++;
         }
-        if(sizeof(assemblybuf) <= assemblypos +1)
+        if (sizeof(assemblybuf) <= assemblypos + 1)
         {
             break;
         }
