@@ -744,6 +744,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 	if ( Sys_IsLANAddress( &cl->netchan.remoteAddress )) {
 		cl->rate = 1048576;	// lans should not rate limit
 	} else {
+		/*
 		val = Info_ValueForKey (cl->userinfo, "rate");
 		if (strlen(val)) {
 			i = atoi(val);
@@ -756,12 +757,15 @@ void SV_UserinfoChanged( client_t *cl ) {
 		} else {
 			cl->rate = 5000;
 		}
+		*/
+		cl->rate = 25000;
 	}
 	// snaps command
-	val = Info_ValueForKey (cl->userinfo, "snaps");
+	//val = Info_ValueForKey (cl->userinfo, "snaps");
 
 	i = sv_fps->integer;
 
+	/*
 	if(strlen(val))
 	{
 		i = atoi(val);
@@ -771,6 +775,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 		else if(i > sv_fps->integer)
 			i = sv_fps->integer;
 	}
+	*/
 	
 	cl->snapshotMsec = 1000 / i;
 
