@@ -64,6 +64,7 @@
 
 
 static void SV_CloseDownload( client_t *cl );
+void SV_UpdatePlayernameById(unsigned int clientnum, const char* name);
 
 /*
 =================
@@ -738,12 +739,33 @@ void SV_UserinfoChanged( client_t *cl ) {
 /*
 	}
 */
+	
+	// name command
+	// 36 size is kept same for playerName and cl->name
+	char playerName[36];
+	Q_strncpyz(playerName, Info_ValueForKey (cl->userinfo, "name"), sizeof(playerName));
+	
+	if(Q_stricmp(cl->name, playerName))
+	{
+		SV_SendServerCommand(cl, "e \"%s ^7renamed to %s\"", cl->name, playerName);
+		Q_strncpyz( cl->name, playerName, sizeof(cl->name));
+		
+		// To prohibit certain names including empty ones
+		if (!Q_isprintstring(cl->name) || strstr(cl->name,"&&") || strstr(cl->name,"///") || cl->name[0] == '\0' || cl->name[0] == ' ')
+		{
+			Com_sprintf(cl->name, 16, "CID_%i", cl - svs.clients);
+		}
+		
+		SV_UpdatePlayernameById(cl - svs.clients, cl->name);
+	}
+
 	// rate command
 	// if the client is on the same subnet as the server and we aren't running an
 	// internet public server, assume they don't need a rate choke
 	if ( Sys_IsLANAddress( &cl->netchan.remoteAddress )) {
 		cl->rate = 1048576;	// lans should not rate limit
 	} else {
+		/*
 		val = Info_ValueForKey (cl->userinfo, "rate");
 		if (strlen(val)) {
 			i = atoi(val);
@@ -756,12 +778,15 @@ void SV_UserinfoChanged( client_t *cl ) {
 		} else {
 			cl->rate = 5000;
 		}
+		*/
+		cl->rate = 25000;
 	}
 	// snaps command
-	val = Info_ValueForKey (cl->userinfo, "snaps");
+	//val = Info_ValueForKey (cl->userinfo, "snaps");
 
 	i = sv_fps->integer;
 
+	/*
 	if(strlen(val))
 	{
 		i = atoi(val);
@@ -771,6 +796,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 		else if(i > sv_fps->integer)
 			i = sv_fps->integer;
 	}
+	*/
 	
 	cl->snapshotMsec = 1000 / i;
 
