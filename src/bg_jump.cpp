@@ -6,7 +6,7 @@
 
 #define PMF_JUMPING 0x4000
 #define PMF_LADDER 0x8
-#define JUMP_LAND_SLOWDOWN_TIME 1
+#define JUMP_LAND_SLOWDOWN_TIME 1800
 
 extern "C" cvar_t* jump_height;
 extern "C" cvar_t* jump_stepSize;
@@ -175,7 +175,6 @@ void __cdecl Jump_ClearState(playerState_s *ps)
 {
   ps->pm_flags &= ~PMF_JUMPING;
   ps->jumpOriginZ = 0.0;
-  ps->jumpTime = 0.0;
 }
 
 double __cdecl Jump_ReduceFriction(playerState_s *ps)
