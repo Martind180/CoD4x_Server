@@ -2421,8 +2421,8 @@ void Cvar_Init (void)
 	Cmd_SetCommandCompletionFunc( "setfromcvar", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("setcvartotime", Cvar_SetToTime_f);
 	Cmd_SetCommandCompletionFunc( "setcvartotime", Cvar_CompleteCvarName );
-	Cmd_AddCommand ("reset", Cvar_Reset_f);
-	Cmd_SetCommandCompletionFunc( "reset", Cvar_CompleteCvarName );
+	Cmd_AddCommand ("resetcvar", Cvar_Reset_f);
+	Cmd_SetCommandCompletionFunc( "resetcvar", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("setu", Cvar_SetU_f);
 	Cmd_SetCommandCompletionFunc( "setu", Cvar_CompleteCvarName );
 	Cmd_AddPCommand ("cvarlist", Cvar_List_f, 98);

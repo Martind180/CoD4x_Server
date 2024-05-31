@@ -416,7 +416,7 @@ void Scr_AddStockMethods()
 	Scr_AddMethod("fadeovertime", HECmd_FadeOverTime, 0);
 	Scr_AddMethod("scaleovertime", HECmd_ScaleOverTime, 0);
 	Scr_AddMethod("moveovertime", HECmd_MoveOverTime, 0);
-	Scr_AddMethod("reset", HECmd_Reset, 0);
+	Scr_AddMethod("resethe", HECmd_Reset, 0);
 	//	Scr_AddMethod("destroy", HECmd_Destroy, 0 );
 	Scr_AddMethod("setpulsefx", HECmd_SetPulseFX, 0);
 	Scr_AddMethod("setplayernamestring", HECmd_SetPlayerNameString, 0);
