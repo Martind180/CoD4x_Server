@@ -575,6 +575,9 @@ void GScr_Pow();
 void GScr_StrCtrlStrip();
 void GScr_ToUpper();
 void GScr_StrReplace();
+void GScr_SendGameServerCommand();
+void GScr_G_FindConfigStringIndex();
+void Gsc_Utils_constructMessage();
 
 void GScr_CloneBrushModelToScriptModel(scr_entref_t brushModelEnt);
 void PlayerCmd_SetStance(scr_entref_t playerEntNum);

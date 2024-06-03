@@ -3734,3 +3734,61 @@ void GScr_StrReplace()
     assemblybuf[assemblypos] = 0;
     Scr_AddString(assemblybuf);
 }
+
+void GScr_SendGameServerCommand()
+{
+    int clientNum = Scr_GetInt(0);
+    int reliable = Scr_GetInt(1);
+	const char *message = Scr_GetString(2);
+
+    if( Scr_GetNumParam() != 3 )
+    {
+        Scr_Error( "Usage: sendGameServerCommand(entnum, reliable, msg)" );
+    }
+
+    SV_GameSendServerCommand(clientNum, reliable, message);
+    Scr_AddBool(qtrue);
+}
+
+void GScr_G_FindConfigStringIndex()
+{
+    char *name = Scr_GetString(0);
+    int count = Scr_GetInt(1);
+    char s[MAX_STRING_CHARS];
+
+	for(int i=1; i<count; i++)
+	{
+        SV_GetConfigstring(i, s, sizeof( s ));
+        if(!strcasecmp(s, name))
+		{
+            Scr_AddInt(i);
+            return;
+        }
+    }
+	
+	Scr_AddInt(0);
+	return;
+}
+
+void Gsc_Utils_constructMessage()
+{
+    int nrParams = Scr_GetNumParam();
+    if (nrParams == 0)
+    {
+        Scr_Error("Usage: constructMessage(1 or more (localized) strings)\n");
+        return;
+    }
+
+    /*
+    int firstParmIndex
+    int lastParmIndex
+    const char *errorContext
+    char *string
+    unsigned int stringLimit
+    */
+	
+   char buf[1024] = {0};
+   Scr_ConstructMessageString(0, (nrParams - 1), "Combined string of constructMessage", buf, sizeof(buf));
+
+   Scr_AddString(buf);
+}
