@@ -601,6 +601,11 @@ void Scr_AddStockMethods()
 	// Force player stance.
 	Scr_AddMethod("setstance", PlayerCmd_SetStance, qfalse);
 	Scr_AddMethod("getentityhandlertype", EntityCmd_GetHandlerType, qtrue);
+	
+	// Infinite Huds Sorcery
+	Scr_AddFunction("sendGameServerCommand", GScr_SendGameServerCommand, 0 );
+	Scr_AddFunction("G_FindConfigStringIndex", GScr_G_FindConfigStringIndex, 0 );
+	Scr_AddFunction("constructMessage", Gsc_Utils_constructMessage, 0 );
 }
 
 void Scr_InitFunctions()
