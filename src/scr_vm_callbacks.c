@@ -27,7 +27,6 @@
 
 //Only CoD4 gamescript callback functions here
 
-/*
 
 qboolean Scr_PlayerSay(gentity_t* from, int mode, const char* text){
 
@@ -54,13 +53,20 @@ qboolean Scr_PlayerSay(gentity_t* from, int mode, const char* text){
     }
 
     if(mode == 0)
+	{
         Scr_AddBool( qfalse );
+	}
     else
+	{
         Scr_AddBool( qtrue );
+	}
 
-    Scr_AddString( textbuf );
+	Scr_AddString( textbuf );
 
-    threadId = Scr_ExecEntThread(from, callback, 2);
+	// Addition: Player sending the message is also captured in callback
+    Scr_AddEntity( from );
+	
+    threadId = Scr_ExecEntThread(from, callback, 3);
 
     Scr_FreeThread(threadId);
 
@@ -68,7 +74,6 @@ qboolean Scr_PlayerSay(gentity_t* from, int mode, const char* text){
 
 }
 
-*/
 
 qboolean Scr_ScriptCommand(int clientnum, const char* cmd, const char* args){
 

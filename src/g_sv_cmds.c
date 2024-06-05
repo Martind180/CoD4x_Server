@@ -602,13 +602,15 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
         return;
     }
 
-    /*
-	Removed. Create a plugin if you want to capature chat.
+    
+	// Removed. Create a plugin if you want to capture chat.
+    // Addition: Readded the previously removed callback
+
 	if(Scr_PlayerSay(ent, mode, textptr))
 	{
 		return;
 	}
-*/
+
     if (text[0] != 0x15 && text[0] != 0x14 && !g_allowConsoleSay->boolean)
         return;
 
@@ -628,12 +630,15 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
         Com_Printf(CON_CHANNEL_SERVER, "Say %s: %s\n", name, text);
     }
 
+    // Chat sending should be handled by the callback function
+    /*
     // send it to all the apropriate clients
     for (j = 0; j < level.maxclients; j++)
     {
         other = &g_entities[j];
         G_SayTo(ent, other, mode, color, teamname, name, text);
     }
+    */
 }
 
 #define MAX_REDIRECTDESTINATIONS 4
