@@ -501,8 +501,6 @@ void G_SayTo(gentity_t *ent, gentity_t *other, int mode, int color, const char *
 
 __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chatText)
 {
-    int j;
-    gentity_t *other;
     int color;
     char name[64];
     char buf[128];
@@ -616,7 +614,6 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
 
     if (g_conrichsay && g_conrichsay->boolean) {
         // echo the text to the console
-        const int isPlaying = ent->client->sess.sessionState == SESS_STATE_PLAYING;
         const int isAttack = ent->client->sess.cs.team == TEAM_BLUE;
         const int isDefence = ent->client->sess.cs.team == TEAM_RED;
         const int c1 = isAttack ? 1 : 0;

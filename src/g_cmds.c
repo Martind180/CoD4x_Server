@@ -953,7 +953,7 @@ void ClientCommand( int clientNum ) {
 		// prevent clients sending this command, effectively dos'ing the server.
 		// Cmd_PrintEntities_f( ent );
 	} else {
-		SV_GameSendServerCommand( clientNum, 0, va( "%c \"GAME_UNKNOWNCLIENTCOMMAND\x15%s\"", 101, cmd ) );
+		//SV_GameSendServerCommand( clientNum, 0, va( "%c \"GAME_UNKNOWNCLIENTCOMMAND\x15%s\"", 101, cmd ) );
 	}
 }
 
