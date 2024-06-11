@@ -2329,8 +2329,8 @@ void SV_AddOperatorCommands()
 	//initialized = qtrue;
 
 	//Former safe commands
-	Cmd_AddPCommand ("systeminfo", SV_Systeminfo_f, 1);
-	Cmd_AddPCommand ("serverinfo", SV_Serverinfo_f, 1);
+	Cmd_AddPCommand ("systeminfo", SV_Systeminfo_f, 100);
+	Cmd_AddPCommand ("serverinfo", SV_Serverinfo_f, 100);
 	Cmd_AddPCommand ("map", SV_Map_f, 60);
 	Cmd_AddCommand ("map_rotate", SV_MapRotate_f);
 	Cmd_AddCommand ("writenvcfg", NV_WriteConfig);
@@ -2361,7 +2361,7 @@ void SV_AddOperatorCommands()
 //	Cmd_AddCommand ("btempban", Cmd_TempBanPlayer_f);
 	Cmd_AddCommand ("banUser", Cmd_BanPlayer_f);
 	Cmd_AddCommand ("banClient", Cmd_BanPlayer_f);
-	Cmd_AddPCommand ("ministatus", SV_MiniStatus_f, 1);
+	Cmd_AddPCommand ("ministatus", SV_MiniStatus_f, 100);
 	Cmd_AddPCommand ("say", SV_ConSayChat_f, 70);
 	Cmd_AddCommand ("consay", SV_ConSayConsole_f);
 	Cmd_AddPCommand ("screensay", SV_ConSayScreen_f, 70);
