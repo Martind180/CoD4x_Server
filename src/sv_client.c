@@ -20,7 +20,7 @@
 ===========================================================================
 */
 
-
+#include "visualcj.hpp"
 #include "q_shared.h"
 #include "qcommon_io.h"
 #include "qcommon_mem.h"
@@ -1039,6 +1039,11 @@ __optimize3 __regparm3 void SV_UserMove( client_t *cl, msg_t *msg, qboolean delt
 	playerState_t *ps;
 //	extclient_t *extcl;
 
+	// Begin OpenCJ: no monkey business
+	cl->rate = sv_maxRate->integer;
+	cl->snapshotMsec = 50; // sv_fps 20
+	// End OpenCJ
+
 	if ( delta ) {
 		cl->deltaMessage = cl->messageAcknowledge;
 	} else {
@@ -1157,6 +1162,8 @@ __optimize3 __regparm3 void SV_UserMove( client_t *cl, msg_t *msg, qboolean delt
 		SV_ClientThink( cl, &cmds[ i ] );
 
 		PHandler_Event(PLUGINS_ONCLIENTMOVECOMMAND, cl, &cmds[ i ]);
+
+		VCJ_onClientMoveCommand(cl, &cmds[i]); // VCJ
 
 		if(cl->demorecording && !cl->demowaiting && cl->demofile.handleFiles.file.o)
 			SV_WriteDemoArchive(cl);
