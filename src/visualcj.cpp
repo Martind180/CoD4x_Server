@@ -55,6 +55,9 @@ static int VCJ_callbacks[VCJ_CB_COUNT];
 static bool VCJ_playerElevationPermissions[MAX_CLIENTS] = {0};
 static bool VCJ_isPlayerElevating[MAX_CLIENTS] = {0};
 
+// Per Player HB
+static bool VCJ_playerHalfbeatPermissions[MAX_CLIENTS] = {0};
+
 // Allow WASD
 static bool VCJ_playerWASDCallbackEnabled[MAX_CLIENTS] = {0};
 
@@ -70,14 +73,14 @@ float VCJ_clientBouncePrevVelocity[MAX_CLIENTS];
 // Height monitoring
 static float VCJ_clientMaxHeight[MAX_CLIENTS] = {0};
 
-// Player objectives
-objective_t VCJ_playerObjectives[MAX_CLIENTS][16];
+//Hb monitoring
+static float VCJ_xvel[MAX_CLIENTS];
+static float VCJ_yvel[MAX_CLIENTS];
 
 /**************************************************************************
  * Forward declarations for static functions                              *
  **************************************************************************/
 
-static void VCJ_onConnect(scr_entref_t id);
 //static void Gsc_GetFollowersAndMe(scr_entref_t id);
 //static void Gsc_StopFollowingMe(scr_entref_t id);
 //static void Gsc_GetMaxHeight(scr_entref_t id);
@@ -256,6 +259,23 @@ static void PlayerCmd_allowElevate(scr_entref_t arg)
     }
 }
 
+static void PlayerCmd_allowHalfBeat(scr_entref_t arg)
+{
+    if (arg.classnum)
+    {
+        Scr_ObjectError("Not an entity");
+    }
+    else
+    {
+        int entityNum = arg.entnum;
+        bool canHalfbeat = Scr_GetInt(0);
+        if (VCJ_playerHalfbeatPermissions[entityNum] != canHalfbeat)
+        {
+            VCJ_playerHalfbeatPermissions[entityNum] = canHalfbeat;
+        }
+    }
+}
+
 static void PlayerCmd_EnableWASDCallback(scr_entref_t arg)
 {
     if (arg.classnum)
@@ -382,6 +402,7 @@ void VCJ_init(void)
     //VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE]         = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnGroundChange",            qfalse);
     VCJ_callbacks[VCJ_CB_PLAYER_BOUNCED]          = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_PlayerBounced",             qfalse);
     VCJ_callbacks[VCJ_CB_ON_PLAYER_ELE]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnElevate",                 qfalse);
+    VCJ_callbacks[VCJ_CB_PLAYER_HB]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnHalfbeat",                 qfalse);
 }
 
 int VCJ_getCallback(VCJ_callback_t callbackType)
@@ -403,31 +424,8 @@ void VCJ_clearPlayerMovementCheckVars(int clientNum)
 void VCJ_addMethodsAndFunctions(void)
 {
     Scr_AddMethod("allowelevate",           PlayerCmd_allowElevate,             qfalse);
+    Scr_AddMethod("allowhalfbeat",           PlayerCmd_allowHalfBeat,             qfalse);
 }
-
-//static void VCJ_onConnect(scr_entref_t id)
-//{
-//    if (id.classnum != 0)
-//    {
-//        // Not an entity
-//        return;
-//    }
-//
-//    gentity_t *gent = &g_entities[id.entnum];
-//    if (!gent || !gent->client)
-//    {
-        // Not a player
-//        return;
-//    }
-//
-//    int clientNum = gent->client->ps.clientNum;
-//
-//    VCJ_previousButtons[id.entnum] = 0;
-//    memset(&VCJ_playerMovement[id.entnum], 0, sizeof(VCJ_playerMovement[id.entnum]));
-//    VCJ_clientOnGround[id.entnum] = false;
-//    VCJ_clientCanBounce[id.entnum] = false;
-//    VCJ_clientBouncePrevVelocity[id.entnum] = 0.0f;
-//}
 
 void VCJ_onFrame(void)
 {
@@ -458,6 +456,15 @@ void VCJ_onUserInfoChanged(gentity_t *ent)
 	}
 }
 
+void VCJ_beforeClientMoveCommand(client_t *client, usercmd_t *ucmd)
+{
+    if (!client || !ucmd || !client->gentity || !client->gentity->client) return;
+
+
+    VCJ_xvel[client - svs.clients] = client->gentity->client->ps.velocity[0];
+    VCJ_yvel[client - svs.clients] = client->gentity->client->ps.velocity[1];
+}
+
 void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
 {
     if (!client || !ucmd || !client->gentity || !client->gentity->client) return;
@@ -482,6 +489,33 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
     // When spectating, client->gentity is the person you're spectating. We don't want reporting for them!
     if (gclient->sess.sessionState == SESS_STATE_PLAYING)
     {
+        //HB detect
+        if(fabs(VCJ_xvel[clientNum]) < fabs(client->gentity->client->ps.velocity[0]) && fabs(client->gentity->client->ps.velocity[0]) > 250 && ucmd->forwardmove == 0)
+        {
+            //posssible hb in x dir
+            int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
+            if(callback)
+            {
+                Scr_AddInt(ucmd->serverTime);
+                gentity_t *ent = SV_GentityNum(clientNum);
+                int threadId = Scr_ExecEntThread(ent, callback, 1);
+                Scr_FreeThread(threadId);
+            }
+        }
+        if(fabs(VCJ_yvel[clientNum]) < fabs(client->gentity->client->ps.velocity[1]) && fabs(client->gentity->client->ps.velocity[1]) > 250 && ucmd->forwardmove == 0)
+        {
+            //posssible hb in x dir
+            int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
+            if(callback)
+            {
+                Scr_AddInt(ucmd->serverTime);
+                gentity_t *ent = SV_GentityNum(clientNum);
+                int threadId = Scr_ExecEntThread(ent, callback, 1);
+                Scr_FreeThread(threadId);
+            }
+        }
+
+
         // 3. onGround reporting
         //bool isOnGround = (gclient->ps.groundEntityNum != 1023);
         //if (isOnGround != VCJ_clientOnGround[clientNum])

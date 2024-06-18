@@ -1159,6 +1159,8 @@ __optimize3 __regparm3 void SV_UserMove( client_t *cl, msg_t *msg, qboolean delt
 
 		cl->clFrames++;
 
+		VCJ_beforeClientMoveCommand(cl, &cmds[i]); // VCJ
+
 		SV_ClientThink( cl, &cmds[ i ] );
 
 		PHandler_Event(PLUGINS_ONCLIENTMOVECOMMAND, cl, &cmds[ i ]);

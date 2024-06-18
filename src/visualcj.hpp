@@ -30,6 +30,7 @@ typedef enum
     VCJ_CB_ONGROUND_CHANGE,
     VCJ_CB_PLAYER_BOUNCED,
     VCJ_CB_ON_PLAYER_ELE,
+    VCJ_CB_PLAYER_HB,
 
     VCJ_CB_COUNT, // Always keep this as last entry
 } VCJ_callback_t;
@@ -43,6 +44,7 @@ void VCJ_onStartJump(struct pmove_t *);
 void VCJ_onJumpCheck(struct pmove_t *);
 void VCJ_onUserInfoChanged(gentity_t *);
 void VCJ_onClientMoveCommand(client_t *, usercmd_t *);
+void VCJ_beforeClientMoveCommand(client_t *, usercmd_t *);
 void VCJ_addMethodsAndFunctions(void);
 int VCJ_getCallback(VCJ_callback_t);
 void VCJ_clearPlayerMovementCheckVars(int);
