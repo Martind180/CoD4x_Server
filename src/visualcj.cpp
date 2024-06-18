@@ -399,7 +399,7 @@ void VCJ_init(void)
     //VCJ_callbacks[VCJ_CB_MOVEBACKWARD]            = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveBackward",              qfalse);
     //VCJ_callbacks[VCJ_CB_MOVERIGHT]               = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveRight",                 qfalse);
     //VCJ_callbacks[VCJ_CB_FPSCHANGE] 				= GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_FPSChange", 				qfalse);
-    //VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE]         = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnGroundChange",            qfalse);
+    VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE]         = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnGroundChange",            qfalse);
     VCJ_callbacks[VCJ_CB_PLAYER_BOUNCED]          = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_PlayerBounced",             qfalse);
     VCJ_callbacks[VCJ_CB_ON_PLAYER_ELE]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnElevate",                 qfalse);
     VCJ_callbacks[VCJ_CB_PLAYER_HB]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnHalfbeat",                 qfalse);
@@ -517,22 +517,21 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
 
 
         // 3. onGround reporting
-        //bool isOnGround = (gclient->ps.groundEntityNum != 1023);
-        //if (isOnGround != VCJ_clientOnGround[clientNum])
-        //{
-         //   VCJ_clientOnGround[clientNum] = isOnGround;
+        bool isOnGround = (gclient->ps.groundEntityNum != 1023);
+        if (isOnGround != VCJ_clientOnGround[clientNum])
+        {
+            VCJ_clientOnGround[clientNum] = isOnGround;
 
             // This callback can spam! Filtering on GSC side required.
-        //    if (VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE])
-        //    {
-         //       Scr_AddVector(gclient->ps.origin);
-         //       Scr_AddInt(ucmd->serverTime);
-         //       Scr_AddBool(isOnGround);
-          //      short ret = Scr_ExecEntThread(client->gentity, VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE], 3);
-          //      Scr_FreeThread(ret);
-          //  }
-        //}
-
+            if (VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE])
+            {
+                Scr_AddVector(gclient->ps.origin);
+                Scr_AddInt(ucmd->serverTime);
+                Scr_AddBool(isOnGround);
+                short ret = Scr_ExecEntThread(client->gentity, VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE], 3);
+                Scr_FreeThread(ret);
+            }
+        }
 
         // 4. Report bounce occurring (https://xoxor4d.github.io/research/cod4-doublebounce/)
         bool canBounce = ((gclient->ps.pm_flags & 0x4000) != 0);
