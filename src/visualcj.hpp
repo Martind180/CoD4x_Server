@@ -16,16 +16,8 @@ typedef enum
     VCJ_CB_PLAYERCOMMAND,
     VCJ_CB_RPGFIRED,
     VCJ_CB_WEAPONFIRED,
-    VCJ_CB_SPECTATORCLIENTCHANGED,
     VCJ_CB_USERINFO,
     VCJ_CB_STARTJUMP,
-    VCJ_CB_MELEEBUTTONPRESSED,
-    VCJ_CB_USEBUTTONPRESSED,
-    VCJ_CB_ATTACKBUTTONPRESSED,
-    VCJ_CB_MOVEFORWARD,
-    VCJ_CB_MOVELEFT,
-    VCJ_CB_MOVEBACKWARD,
-    VCJ_CB_MOVERIGHT,
     VCJ_CB_FPSCHANGE,
     VCJ_CB_ONGROUND_CHANGE,
     VCJ_CB_PLAYER_BOUNCED,
@@ -48,13 +40,15 @@ void VCJ_beforeClientMoveCommand(client_t *, usercmd_t *);
 void VCJ_addMethodsAndFunctions(void);
 int VCJ_getCallback(VCJ_callback_t);
 void VCJ_clearPlayerMovementCheckVars(int);
+bool VCJ_updatePlayerFPS(int, int, int *);
+void VCJ_clearPlayerFPS(int);
 
 void Ext_RPGFiredCallback(gentity_t *, gentity_t *);
-//void Ext_WeaponFiredCallback(gentity_t *);
 int Ext_IsPlayerAllowedToEle(struct pmove_t *);
 void Ext_PlayerTryingToEle(struct pmove_t *);
 void Ext_PlayerNotEle(struct pmove_t *);
-//void Ext_SpectatorClientChanged(gentity_t *, int, int);
+
+void Gsc_Player_setOriginAndAngles(int id);
 
 #ifdef __cplusplus
 }

@@ -17,6 +17,8 @@ extern "C" {
 
 #include "scr_vm.h"
 #include "scr_vm_functions.h"
+#include "g_shared.h"
+#include "g_sv_shared.h"
 #include "xassets/weapondef.h"
 #include "bg_public.h"
 #include "cscr_stringlist.h"
@@ -32,7 +34,7 @@ extern int GScr_LoadScriptAndLabel(const char *scriptName, const char *labelName
  * Defines                                                                *
  **************************************************************************/
 
-
+#define NR_SAMPLES_FPS_AVERAGING 20
 
 /**************************************************************************
  * Types                                                                  *
@@ -77,14 +79,16 @@ static float VCJ_clientMaxHeight[MAX_CLIENTS] = {0};
 static float VCJ_xvel[MAX_CLIENTS];
 static float VCJ_yvel[MAX_CLIENTS];
 
+// For client FPS calculation
+static int VCJ_clientFrameTimes[MAX_CLIENTS][NR_SAMPLES_FPS_AVERAGING] = {{0}}; // Client frame times storage, per client, with x samples
+static int VCJ_clientFrameTimesSampleIdx[MAX_CLIENTS] = {0}; // Index in VCJ_clientFrameTimes, per client
+static int VCJ_prevClientFrameTimes[MAX_CLIENTS] = {0};
+static int VCJ_avgFrameTimeMs[MAX_CLIENTS] = {0};
+
 /**************************************************************************
  * Forward declarations for static functions                              *
  **************************************************************************/
-
-//static void Gsc_GetFollowersAndMe(scr_entref_t id);
-//static void Gsc_StopFollowingMe(scr_entref_t id);
-//static void Gsc_GetMaxHeight(scr_entref_t id);
-//static void Gsc_ResetMaxHeight(scr_entref_t id);
+static void VCJ_onConnect(scr_entref_t id);
 //static void Gsc_ClientUserInfoChanged(scr_entref_t id);
 //static void Gsc_ScaleOverTime(scr_entref_t hudelem);
 //static void Gsc_GetConfigStringByIndex();
@@ -92,154 +96,6 @@ static float VCJ_yvel[MAX_CLIENTS];
 /**************************************************************************
  * Static functions                                                       *
  **************************************************************************/
-
-static void PlayerCmd_ClientCommand(scr_entref_t arg)
-{
-    mvabuf;
-
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        int entityNum = arg.entnum;
-        gentity_t *gentity = &g_entities[entityNum];
-
-        if (!gentity->client)
-        {
-            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
-        }
-        else
-        {
-            if (Scr_GetNumParam() != 0)
-            {
-                Scr_Error("Usage: self ClientCommand()\n");
-            }
-            else
-            {
-                ClientCommand(entityNum);
-            }
-        }
-    }
-}
-
-static void PlayerCmd_FollowPlayer(scr_entref_t arg)
-{
-    mvabuf;
-
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        int entityNum = arg.entnum;
-        gentity_t *gentity = &g_entities[entityNum];
-        if (!gentity->client)
-        {
-            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
-        }
-        else
-        {
-            gentity = g_entities + entityNum;
-            if (Scr_GetNumParam() != 1)
-            {
-                Scr_Error("Usage: self followplayer(newplayer entid)\n");
-            }
-            else
-            {
-                int target = Scr_GetInt(0);
-                if (target >= 0)
-                {
-                    extern qboolean Cmd_FollowClient_f(gentity_t *, int);
-                    Cmd_FollowClient_f(gentity, target);
-                }
-                else
-                {
-                    StopFollowing(gentity);
-                }
-            }
-        }
-    }
-}
-
-static void PlayerCmd_RenameClient(scr_entref_t arg)
-{
-    mvabuf;
-
-    if (arg.classnum)
-    {
-            Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        int entityNum = arg.entnum;
-        gentity_t *gentity = &g_entities[entityNum];
-        if (!gentity->client)
-        {
-            Scr_ObjectError(va("Entity: %i is not a player", entityNum));
-        }
-        else
-        {
-            gentity = g_entities + entityNum;
-            gclient_t *client = gentity->client;
-            if (Scr_GetNumParam() != 1)
-            {
-                Scr_Error("Usage: (cleanedName =) self renameClient(<string>)\n");
-            }
-
-            char *s = Scr_GetString(0);
-            renameClient(client, s);
-            Scr_AddString(client->sess.newnetname);
-            return;
-        }
-    }
-
-    Scr_AddUndefined();
-}
-
-static void PlayerCmd_StartRecord(scr_entref_t arg)
-{
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        int entityNum = arg.entnum;
-        client_t *client = &svs.clients[entityNum];
-
-        if (Scr_GetNumParam() != 1)
-        {
-            Scr_Error("Usage: self startrecord(<string>)\n");
-        }
-        else
-        {
-            char *demoname = Scr_GetString(0);
-            if (demoname && (demoname[0] != '\0'))
-            {
-                SV_RecordClient(client, demoname);
-            }
-        }
-    }
-    Scr_AddInt(0);
-}
-
-static void PlayerCmd_StopRecord(scr_entref_t arg)
-{
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        int entityNum = arg.entnum;
-        client_t *client = &svs.clients[entityNum];
-        SV_StopRecord(client);
-    }
-    Scr_AddInt(0);
-}
 
 static void PlayerCmd_allowElevate(scr_entref_t arg)
 {
@@ -276,107 +132,10 @@ static void PlayerCmd_allowHalfBeat(scr_entref_t arg)
     }
 }
 
-static void PlayerCmd_EnableWASDCallback(scr_entref_t arg)
-{
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        VCJ_playerWASDCallbackEnabled[arg.entnum] = true;
-    }
-}
-
-static void PlayerCmd_DisableWASDCallback(scr_entref_t arg)
-{
-    if (arg.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-    }
-    else
-    {
-        VCJ_playerWASDCallbackEnabled[arg.entnum] = false;
-    }
-}
-
-void PlayerCmd_SetMoveSpeed_Wrap(scr_entref_t id)
-{
-    if (id.classnum)
-    {
-        Scr_ObjectError("Not an entity");
-        return;
-    }
-
-    if (Scr_GetNumParam() != 1)
-    {
-        Scr_Error("Usage: self setmovespeed( <integer> )\n");
-        return;
-    }
-
-    int entityNum = id.entnum;
-    gentity_t *gentity = &g_entities[entityNum];
-    if (!gentity->client)
-    {
-        Scr_ObjectError(va("Entity: %i is not a player", entityNum));
-        return;
-    }
-
-    int speed = Scr_GetInt(0);
-
-    if ((speed <= 0) || (speed > 1000))
-    {
-        Scr_Error("setmovespeed range is between 0 and 1000\n");
-        return;
-    }
-
-    gentity->client->sess.moveSpeedScaleMultiplier = (float)speed / g_speed->integer;
-}
-
 /**************************************************************************
  * Global functions                                                       *
  **************************************************************************/
 
-void renameClient(gclient_t *client, char *s)
-{
-    if (!client || !s || (s[0] == '\0')) return;
-
-    int i = 0;
-    // Strip leading spaces
-    while (s[i] == ' ')
-    {
-        s++; // Skip over the space
-        i++;
-    }
-
-    i = 0;
-    while (s[i] != '\0')
-    {
-        if (((unsigned char)s[i] < 0x1F) || ((unsigned char)s[i] == 0x7F))
-        {
-            s[i] = '?';
-        }
-        i++;
-    }
-
-    // Enforce a minimum name length. Since this could require more characters than were allocated, allocate a new buffer
-    char buf[64] = {0};
-    Q_strncpyz(buf, s, sizeof(buf));
-    char *pCleanedNewName = (char *)buf;
-    int newNameLen = strlen(pCleanedNewName);
-    int minNameLen = 3;
-    if (newNameLen < minNameLen)
-    {
-        for (int i = 0; i < (minNameLen - newNameLen); i++)
-        {
-            pCleanedNewName[newNameLen + i] = (i % 10) + '0'; // Limit to 0-9
-        }
-    }
-
-    ClientCleanName(pCleanedNewName, client->sess.cs.netname, sizeof(client->sess.cs.netname), qtrue);
-    CS_SetPlayerName(&client->sess.cs, client->sess.cs.netname);
-    Q_strncpyz(client->sess.newnetname, client->sess.cs.netname, sizeof(client->sess.newnetname));
-}
 
 /**************************************************************************
  * OpenCJ functions                                                       *
@@ -385,20 +144,11 @@ void renameClient(gclient_t *client, char *s)
 void VCJ_init(void)
 {
     // Init callbacks
-    //VCJ_callbacks[VCJ_CB_PLAYERCOMMAND]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_PlayerCommand",             qfalse);
     VCJ_callbacks[VCJ_CB_RPGFIRED]                = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_RPGFired",                  qfalse);
     //VCJ_callbacks[VCJ_CB_WEAPONFIRED]             = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_WeaponFired",               qfalse);
-    //VCJ_callbacks[VCJ_CB_SPECTATORCLIENTCHANGED]  = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_SpectatorClientChanged",    qfalse);
     //VCJ_callbacks[VCJ_CB_USERINFO]                = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_UserInfoChanged",           qfalse);
     //VCJ_callbacks[VCJ_CB_STARTJUMP]               = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_StartJump",                 qfalse);
-    //VCJ_callbacks[VCJ_CB_MELEEBUTTONPRESSED]      = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MeleeButton",               qfalse);
-    //VCJ_callbacks[VCJ_CB_USEBUTTONPRESSED]        = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_UseButton",                 qfalse);
-    //VCJ_callbacks[VCJ_CB_ATTACKBUTTONPRESSED]     = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_AttackButton",              qfalse);
-    //VCJ_callbacks[VCJ_CB_MOVEFORWARD]             = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveForward",               qfalse);
-    //VCJ_callbacks[VCJ_CB_MOVELEFT]                = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveLeft",                  qfalse);
-    //VCJ_callbacks[VCJ_CB_MOVEBACKWARD]            = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveBackward",              qfalse);
-    //VCJ_callbacks[VCJ_CB_MOVERIGHT]               = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_MoveRight",                 qfalse);
-    //VCJ_callbacks[VCJ_CB_FPSCHANGE] 				= GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_FPSChange", 				qfalse);
+    VCJ_callbacks[VCJ_CB_FPSCHANGE] 				= GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_FPSChange", 				qfalse);
     VCJ_callbacks[VCJ_CB_ONGROUND_CHANGE]         = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnGroundChange",            qfalse);
     VCJ_callbacks[VCJ_CB_PLAYER_BOUNCED]          = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_PlayerBounced",             qfalse);
     VCJ_callbacks[VCJ_CB_ON_PLAYER_ELE]           = GScr_LoadScriptAndLabel("maps/mp/gametypes/_callbacksetup", "CodeCallback_OnElevate",                 qfalse);
@@ -425,11 +175,38 @@ void VCJ_addMethodsAndFunctions(void)
 {
     Scr_AddMethod("allowelevate",           PlayerCmd_allowElevate,             qfalse);
     Scr_AddMethod("allowhalfbeat",           PlayerCmd_allowHalfBeat,             qfalse);
+    Scr_AddMethod("player_onconnect",       VCJ_onConnect,                   qfalse);
+    Scr_AddMethod("setoriginandangles",       (xmethod_t)Gsc_Player_setOriginAndAngles,                   qfalse);
+}
+
+static void VCJ_onConnect(scr_entref_t id)
+{
+    if (id.classnum != 0)
+    {
+        // Not an entity
+        return;
+    }
+
+    gentity_t *gent = &g_entities[id.entnum];
+    if (!gent || !gent->client)
+    {
+        // Not a player
+        return;
+    }
+
+    int clientNum = gent->client->ps.clientNum;
+    VCJ_clearPlayerFPS(clientNum);
+
+    VCJ_previousButtons[id.entnum] = 0;
+    memset(&VCJ_playerMovement[id.entnum], 0, sizeof(VCJ_playerMovement[id.entnum]));
+    VCJ_clientOnGround[id.entnum] = false;
+    VCJ_clientCanBounce[id.entnum] = false;
+    VCJ_clientBouncePrevVelocity[id.entnum] = 0.0f;
 }
 
 void VCJ_onFrame(void)
 {
-    //mysql_handle_result_callbacks();
+
 }
 
 void VCJ_onJumpCheck(struct pmove_t *pm)
@@ -475,21 +252,21 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
     int clientNum = client - svs.clients;
 	int time = ucmd->serverTime;
     int avgFrameTime = 0;
-    //if (VCJ_updatePlayerFPS(clientNum, time, &avgFrameTime))
-    //{
+    if (VCJ_updatePlayerFPS(clientNum, time, &avgFrameTime))
+    {
         // Client FPS changed, report this to GSC via callback
-	//	if (VCJ_callbacks[VCJ_CB_FPSCHANGE])
-	//	{
-	//		Scr_AddInt(avgFrameTime);
-	//		short ret = Scr_ExecEntThread(client->gentity, VCJ_callbacks[VCJ_CB_FPSCHANGE], 1);
-	//		Scr_FreeThread(ret);
-	//	}
-	//}
+		if (VCJ_callbacks[VCJ_CB_FPSCHANGE])
+		{
+			Scr_AddInt(avgFrameTime);
+			short ret = Scr_ExecEntThread(client->gentity, VCJ_callbacks[VCJ_CB_FPSCHANGE], 1);
+			Scr_FreeThread(ret);
+		}
+	}
 
     // When spectating, client->gentity is the person you're spectating. We don't want reporting for them!
     if (gclient->sess.sessionState == SESS_STATE_PLAYING)
     {
-        //HB detect
+        //---- 2. Player HB determination
         if(fabs(VCJ_xvel[clientNum]) < fabs(client->gentity->client->ps.velocity[0]) && fabs(client->gentity->client->ps.velocity[0]) > 250 && ucmd->forwardmove == 0)
         {
             //posssible hb in x dir
@@ -569,11 +346,134 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
     }
 }
 
+bool VCJ_updatePlayerFPS(int clientNum, int time, int *pAvgFrameTimeMs)
+{
+    VCJ_clientFrameTimes[clientNum][VCJ_clientFrameTimesSampleIdx[clientNum]] = time - VCJ_prevClientFrameTimes[clientNum];
+    VCJ_prevClientFrameTimes[clientNum] = time;
+
+    // There are x sample slots, if all are used we restart at begin
+    if (++VCJ_clientFrameTimesSampleIdx[clientNum] >= NR_SAMPLES_FPS_AVERAGING)
+    {
+        VCJ_clientFrameTimesSampleIdx[clientNum] = 0;
+    }
+
+    // Sum frame times so we can use it to calculate the average
+    float sumFrameTime = 0;
+    for (int i = 0; i < NR_SAMPLES_FPS_AVERAGING; i++)
+    {
+        sumFrameTime += (float)VCJ_clientFrameTimes[clientNum][i];
+    }
+
+    // Check if client frame time is different from what we previously reported
+    bool hasFPSChanged = false;
+    int avgFrameTime = (int)round(sumFrameTime / NR_SAMPLES_FPS_AVERAGING);
+    if (VCJ_avgFrameTimeMs[clientNum] != avgFrameTime)
+    {
+        // Client FPS changed, report this to GSC via callback
+        VCJ_avgFrameTimeMs[clientNum] = avgFrameTime;
+        if (pAvgFrameTimeMs)
+        {
+            *pAvgFrameTimeMs = avgFrameTime;
+            hasFPSChanged = true;
+        }
+    }
+
+    return hasFPSChanged;
+}
+
+void VCJ_clearPlayerFPS(int clientNum)
+{
+    memset(VCJ_clientFrameTimes[clientNum], 0, sizeof(VCJ_clientFrameTimes[clientNum]));
+    VCJ_clientFrameTimesSampleIdx[clientNum] = 0;
+    VCJ_prevClientFrameTimes[clientNum] = 0;
+    VCJ_avgFrameTimeMs[clientNum] = 0;
+}
+
 /**************************************************************************
  * GSC commands                                                           *
  **************************************************************************/
 
+void Gsc_Player_setOriginAndAngles(int id)
+{
+	//sets origin, angles
+	//resets pm_flags and velocity
+	//keeps stance
 
+	#define PMF_DUCKED 0x2
+	#define PMF_PRONE 0x1 //untested
+	#define EF_TELEPORT_BIT 0x2
+
+	gentity_s *ent;
+	vec3_t origin;
+	vec3_t angles;
+	ent = &g_entities[id];
+	if(!ent->client)
+	{
+		Scr_ObjectError(va("entity %i is not a player", id));
+	}
+
+	Scr_GetVector(0, origin);
+	Scr_GetVector(1, angles);
+
+	bool isUsingTurret;
+	isUsingTurret = ((ent->client->ps.otherFlags & 4) != 0  && (ent->client->ps.eFlags & 0x300) != 0);
+	//stop using MGs
+	if(isUsingTurret)
+	{
+		G_ClientStopUsingTurret(&g_entities[ent->client->ps.viewlocked_entNum]);
+	}
+
+	G_EntUnlink(ent);
+
+	//unlink client from linkto() stuffs
+
+	if (ent->r.linked)
+	{
+		SV_UnlinkEntity(ent);
+	}
+
+	//clear flags
+	ent->client->ps.pm_flags &= (PMF_DUCKED | PMF_PRONE);//keep stance
+	ent->client->ps.eFlags ^= EF_TELEPORT_BIT; //alternate teleport flag, unsure why
+
+	//set times
+	ent->client->ps.pm_time = 0;
+	ent->client->ps.jumpTime = 0; //to reset wallspeed effects
+
+	//set origin
+	VectorCopy(origin, ent->client->ps.origin);
+    G_SetOrigin(ent, origin);
+
+
+	//reset velocity
+	ent->client->ps.velocity[0] = 0;
+	ent->client->ps.velocity[1] = 0;
+	ent->client->ps.velocity[2] = 0;
+
+
+	ent->client->ps.sprintState.sprintButtonUpRequired = 0;
+	ent->client->ps.sprintState.sprintDelay = 0;
+	ent->client->ps.sprintState.lastSprintStart = 0;
+	ent->client->ps.sprintState.lastSprintEnd = 0;
+	ent->client->ps.sprintState.sprintStartMaxLength = 0;
+
+
+	//pretend we're not proning so that prone angle is ok after having called SetClientViewAngle (otherwise it gets a correction)
+	int flags = ent->client->ps.pm_flags;
+	ent->client->ps.pm_flags &= ~PMF_PRONE;
+
+	SetClientViewAngle(ent, angles);
+
+	//reset velocity
+	ent->client->ps.velocity[0] = 0;
+	ent->client->ps.velocity[1] = 0;
+	ent->client->ps.velocity[2] = 0;
+
+	//restore prone if any
+	ent->client->ps.pm_flags = flags;
+
+	SV_LinkEntity(ent);
+}
 
 
 /**************************************************************************
