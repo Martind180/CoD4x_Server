@@ -267,7 +267,7 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
     if (gclient->sess.sessionState == SESS_STATE_PLAYING)
     {
         //---- 2. Player HB determination
-        if(fabs(VCJ_xvel[clientNum]) < fabs(client->gentity->client->ps.velocity[0]) && fabs(client->gentity->client->ps.velocity[0]) > 250 && ucmd->forwardmove == 0)
+        if(fabs(VCJ_xvel[clientNum]) < fabs(client->gentity->client->ps.velocity[0]) && fabs(client->gentity->client->ps.velocity[0]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
         {
             //posssible hb in x dir
             int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
@@ -279,7 +279,7 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
                 Scr_FreeThread(threadId);
             }
         }
-        if(fabs(VCJ_yvel[clientNum]) < fabs(client->gentity->client->ps.velocity[1]) && fabs(client->gentity->client->ps.velocity[1]) > 250 && ucmd->forwardmove == 0)
+        if(fabs(VCJ_yvel[clientNum]) < fabs(client->gentity->client->ps.velocity[1]) && fabs(client->gentity->client->ps.velocity[1]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
         {
             //posssible hb in x dir
             int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
