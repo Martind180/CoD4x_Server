@@ -40,3 +40,13 @@ void Scr_MySQL_Fetch_Rows_f()
 {
     GetPlugin()->OnScript_Fetch_Rows();
 }
+
+void Scr_MySQL_Stored_Procedure_f()
+{
+    GetPlugin()->OnScript_Stored_Procedure();
+}
+
+void Scr_MySQL_Escape_String_f()
+{
+    GetPlugin()->OnScript_Escape_String();
+}

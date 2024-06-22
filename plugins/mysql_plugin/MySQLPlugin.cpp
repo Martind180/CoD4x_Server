@@ -116,6 +116,8 @@ int CMySQLPlugin::OnInit()
     Plugin_ScrAddFunction("mysql_fetch_row", Scr_MySQL_Fetch_Row_f);
     /* MySQL-custom */
     Plugin_ScrAddFunction("mysql_fetch_rows", Scr_MySQL_Fetch_Rows_f);
+    Plugin_ScrAddFunction("mysql_stored_procedure", Scr_MySQL_Stored_Procedure_f);
+    Plugin_ScrAddFunction("mysql_real_escape_string", Scr_MySQL_Escape_String_f);
 
     /*Viking: addition for chatbot*/
     Plugin_ScrAddMethod("getPlayerIP", &getPlayerIP);
@@ -513,6 +515,117 @@ void CMySQLPlugin::OnScript_Fetch_Rows()
         Plugin_Scr_AddArray();
     }
     Plugin_Free(keyArrayIndex);
+}
+
+void CMySQLPlugin::OnScript_Escape_String()
+{
+    if (Plugin_Scr_GetNumParam() != 2)
+    {
+        Plugin_Scr_Error("Usage: mysql_stored_procedure(<handle>, <string>);");
+        return;
+    }
+    int idx = getHandleIndexForScriptArg(0);
+    char *string = Plugin_Scr_GetString(1);
+    checkConnection(idx);
+
+    char *to = (char *)malloc(strlen(string) * 2 + 1);
+
+    mysql_real_escape_string(&m_MySQL[idx], to, string, strlen(string));
+
+    Plugin_Scr_AddString(to);
+    free(to);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+/* =================================================================
+* Description
+    Retrieves all rows from stored procedure .
+* Return Value(s)
+    A MYSQL_ROW structure from a stored procedure. It will return a different
+    array depending on the amount of rows. one row and it will return
+    a single dimensioned array using the column names as the array
+    keys. If it is more than one row then it will return a 2D array
+    the first dimension will be a numerical iterator through the rows
+    and the second dimension will be the columns names as array keys.
+   ================================================================= */
+void CMySQLPlugin::OnScript_Stored_Procedure()
+{
+    if (Plugin_Scr_GetNumParam() != 2)
+    {
+        Plugin_Scr_Error("Usage: mysql_stored_procedure(<handle>, <procedure call>);");
+        return;
+    }
+
+    int idx = getHandleIndexForScriptArg(0);
+    char *procedureCall = Plugin_Scr_GetString(1);
+    checkConnection(idx);
+
+    // Clear out the previous results from the member variable
+    for(auto result : m_MySQLResultsMulti)
+    {
+        mysql_free_result(result);
+    }
+
+    m_MySQLResultsMulti.clear();
+
+    if (mysql_query(&m_MySQL[idx], procedureCall) == 0)
+    {
+        int status = 0;
+
+        do {
+            MYSQL_RES *result = mysql_store_result(&m_MySQL[idx]);
+
+            if(result)
+            {
+                m_MySQLResultsMulti.push_back(result);
+
+                // Create an array to hold each row
+                Plugin_Scr_MakeArray();
+
+                unsigned int i = 0;
+                unsigned int col_count = mysql_num_fields(result);
+                int *keyArrayIndex = reinterpret_cast<int *>(Plugin_Malloc(col_count * sizeof(int)));
+                MYSQL_FIELD *field;
+                while ((field = mysql_fetch_field(result)) != NULL)
+                {
+                    keyArrayIndex[i] = Plugin_Scr_AllocString(field->name);
+                    ++i;
+                }
+
+                MYSQL_ROW rows;
+                while ((rows = mysql_fetch_row(result)) != NULL)
+                {
+                    Plugin_Scr_MakeArray();
+                    for (unsigned int i = 0; i < col_count; ++i)
+                    {
+                        if(rows[i] == NULL)
+                            Plugin_Scr_AddUndefined();
+                        else
+                            Plugin_Scr_AddString(rows[i]);
+
+                        Plugin_Scr_AddArrayStringIndexed(keyArrayIndex[i]);
+                    }
+                    Plugin_Scr_AddArray();
+                }
+                Plugin_Free(keyArrayIndex);
+            }
+
+            if((status = mysql_next_result(&m_MySQL[idx])) > 0)
+            {
+                pluginError("MySQL query error: (%d) %s",
+                            mysql_errno(&m_MySQL[idx]),
+                            mysql_error(&m_MySQL[idx]));
+            }
+
+        } while(status == 0);
+
+    }
+    else
+    {
+        pluginError("MySQL query error: (%d) %s",
+                    mysql_errno(&m_MySQL[idx]),
+                    mysql_error(&m_MySQL[idx]));
+    }
 }
 /////////////////////////////////////////////////////////////////////////////////
 void CMySQLPlugin::OnInfoRequest(pluginInfo_t *Info_)

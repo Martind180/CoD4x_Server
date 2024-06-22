@@ -1,5 +1,6 @@
 #pragma once
 #include "../pinc.h"
+#include <vector>
 
 //extern "C"
 //{
@@ -36,6 +37,8 @@ public:
     void OnScript_Fetch_Row();
     /* MySQL-custom */
     void OnScript_Fetch_Rows();
+    void OnScript_Stored_Procedure();
+    void OnScript_Escape_String();
 
     static CMySQLPlugin* g_MySQLPlugin;
 
@@ -57,6 +60,7 @@ private:
     // Members.
     MYSQL m_MySQL[MYSQL_CONNECTION_COUNT];
     MYSQL_RES* m_MySQLResults[MYSQL_CONNECTION_COUNT];
+    std::vector<MYSQL_RES*> m_MySQLResultsMulti;
     bool m_MySQLInUse[MYSQL_CONNECTION_COUNT];
     unsigned int m_MYSQLErrNo[MYSQL_CONNECTION_COUNT];
 };

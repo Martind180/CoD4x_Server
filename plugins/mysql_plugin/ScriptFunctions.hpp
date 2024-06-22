@@ -8,3 +8,5 @@ void Scr_MySQL_Num_Rows_f();
 void Scr_MySQL_Num_Fields_f();
 void Scr_MySQL_Fetch_Row_f();
 void Scr_MySQL_Fetch_Rows_f();
+void Scr_MySQL_Stored_Procedure_f();
+void Scr_MySQL_Escape_String_f();
