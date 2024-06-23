@@ -532,26 +532,6 @@ __cdecl void G_Say(gentity_t *ent, gentity_t *target, int mode, const char *chat
     if (textptr[0] == 0x15)
         textptr++;
 
-    if (textptr[0] == '/' || textptr[0] == '$' || (textptr[0] == '!' && !g_disabledefcmdprefix->boolean))
-    { //Check for Command-Prefix
-        textptr++;
-        SV_ExecuteRemoteCmd(ent->s.number, textptr);
-        //Scr_PlayerSay(ent, mode, textptr -1);
-        return;
-    }
-
-    if (Q_stricmpn(textptr, "changepassword", 14) == 0)
-    {
-        SV_ExecuteRemoteCmd(ent->s.number, textptr);
-        return;
-    }
-
-    if (sv_disableChat->boolean == qtrue)
-    {
-        SV_GameSendServerCommand(ent->s.number, 0, "\x67 \"Chat messages disabled on this server\"");
-        return;
-    }
-
     switch (mode)
     {
     default:

@@ -23,6 +23,7 @@
 
 #include "q_shared.h"
 #include "entity.h"
+#include "g_shared.h"
 #include "scr_vm.h"
 
 //Only CoD4 gamescript callback functions here
@@ -46,6 +47,60 @@ qboolean Scr_PlayerSay(gentity_t* from, int mode, const char* text){
         ++j;
     }
     textbuf[j] = '\0';
+
+    //Some AI Generated code I need to test to see if it allows other languages characters
+    // for(i = 0, j = 0; i < sizeof(textbuf) -1 && text[i];){
+    //     if ((text[i] & 0x80) == 0) {               // leading byte 0xxxxxxx ASCII
+    //         textbuf[j] = text[i];
+    //         if(text[i] < ' '){
+    //             ++i;
+    //             continue;
+    //         }
+    //         ++i;
+    //     }
+    //     else if ((text[i] & 0xE0) == 0xC0) {        // leading byte 110xxxxx
+    //         textbuf[j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //     }
+    //     else if ((text[i] & 0xF0) == 0xE0) {        // leading byte 1110xxxx
+    //         textbuf[j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //     }
+    //     else if ((text[i] & 0xF8) == 0xF0) {        // leading byte 11110xxx
+    //         textbuf[j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //         textbuf[++j] = text[i];
+    //         ++i;
+    //     }
+    //     ++j;
+    // }
+    // textbuf[j] = '\0';
+
+    if (textbuf[0] == '/' || textbuf[0] == '$' || (textbuf[0] == '!' && !g_disabledefcmdprefix->boolean))
+    {
+        //send to command handle callback
+        callback = script_CallBacks_new[SCR_CB_SCRIPTCOMMAND];
+        if(!callback){
+            return qfalse;
+        }
+
+        Scr_AddString(textbuf);
+        Scr_AddEntity(from);
+        threadId = Scr_ExecEntThread(from, callback, 2);
+        Scr_FreeThread(threadId);
+        return qtrue;
+    }
+
 
     callback = script_CallBacks_new[SCR_CB_SAY];
     if(!callback){
