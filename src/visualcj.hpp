@@ -49,6 +49,7 @@ void Ext_PlayerTryingToEle(struct pmove_t *);
 void Ext_PlayerNotEle(struct pmove_t *);
 
 void Gsc_Player_setOriginAndAngles(int id);
+void Gsc_Player_switchToWeaponSeamless(int id);
 
 #ifdef __cplusplus
 }

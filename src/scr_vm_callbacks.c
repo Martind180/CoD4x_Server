@@ -93,6 +93,12 @@ qboolean Scr_PlayerSay(gentity_t* from, int mode, const char* text){
         if(!callback){
             return qfalse;
         }
+        // remove the command character from the string (!,/,$)
+        if (textbuf[0] != '\0') {
+            for (int i = 0; textbuf[i] != '\0'; ++i) {
+                textbuf[i] = textbuf[i + 1];
+            }
+        }
 
         Scr_AddString(textbuf);
         Scr_AddEntity(from);

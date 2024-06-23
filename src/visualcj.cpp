@@ -177,6 +177,7 @@ void VCJ_addMethodsAndFunctions(void)
     Scr_AddMethod("allowhalfbeat",           PlayerCmd_allowHalfBeat,             qfalse);
     Scr_AddMethod("player_onconnect",       VCJ_onConnect,                   qfalse);
     Scr_AddMethod("setoriginandangles",       (xmethod_t)Gsc_Player_setOriginAndAngles,                   qfalse);
+    Scr_AddMethod("switchtoweaponseamless",       (xmethod_t)Gsc_Player_switchToWeaponSeamless,                   qfalse);
 }
 
 static void VCJ_onConnect(scr_entref_t id)
@@ -473,6 +474,22 @@ void Gsc_Player_setOriginAndAngles(int id)
 	ent->client->ps.pm_flags = flags;
 
 	SV_LinkEntity(ent);
+}
+
+void Gsc_Player_switchToWeaponSeamless(int id)
+{
+    const char *szWeaponName = Scr_GetString(0);
+    if (szWeaponName)
+    {
+        playerState_t *ps = SV_GameClientNum(id);
+        int weaponIdx = G_GetWeaponIndexForName(szWeaponName);
+        if (BG_IsWeaponValid(ps, weaponIdx))
+        {
+            ps->weapon = weaponIdx;
+            //ps->weaponstate = 0; // WEAPON_READY
+            SV_GameSendServerCommand(id, 1, va("%c %i", 'a', weaponIdx));
+        }
+    }
 }
 
 
