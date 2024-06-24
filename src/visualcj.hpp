@@ -50,6 +50,12 @@ void Ext_PlayerNotEle(struct pmove_t *);
 
 void Gsc_Player_setOriginAndAngles(int id);
 void Gsc_Player_switchToWeaponSeamless(int id);
+void Gsc_Player_SetPMFlags(int id);
+void Gsc_Player_GetPMFlags(int id);
+void Gsc_Player_GetPMTime(int id);
+void Gsc_Player_Velocity_Add(int id);
+
+void Gsc_Utils_VectorScale();
 
 #ifdef __cplusplus
 }

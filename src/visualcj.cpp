@@ -173,11 +173,17 @@ void VCJ_clearPlayerMovementCheckVars(int clientNum)
 
 void VCJ_addMethodsAndFunctions(void)
 {
-    Scr_AddMethod("allowelevate",           PlayerCmd_allowElevate,             qfalse);
-    Scr_AddMethod("allowhalfbeat",           PlayerCmd_allowHalfBeat,             qfalse);
-    Scr_AddMethod("player_onconnect",       VCJ_onConnect,                   qfalse);
-    Scr_AddMethod("setoriginandangles",       (xmethod_t)Gsc_Player_setOriginAndAngles,                   qfalse);
-    Scr_AddMethod("switchtoweaponseamless",       (xmethod_t)Gsc_Player_switchToWeaponSeamless,                   qfalse);
+    Scr_AddMethod("allowelevate",                    PlayerCmd_allowElevate,                          qfalse);
+    Scr_AddMethod("allowhalfbeat",                   PlayerCmd_allowHalfBeat,                         qfalse);
+    Scr_AddMethod("player_onconnect",                VCJ_onConnect,                                   qfalse);
+    Scr_AddMethod("setoriginandangles",              (xmethod_t)Gsc_Player_setOriginAndAngles,        qfalse);
+    Scr_AddMethod("switchtoweaponseamless",          (xmethod_t)Gsc_Player_switchToWeaponSeamless,    qfalse);
+    Scr_AddMethod("getPMFlags",                      (xmethod_t)Gsc_Player_GetPMFlags,                qfalse);
+    Scr_AddMethod("getPMTime",                       (xmethod_t)Gsc_Player_GetPMTime,                 qfalse);
+    Scr_AddMethod("setPMFlags",                      (xmethod_t)Gsc_Player_SetPMFlags,                qfalse);
+    Scr_AddMethod("addVelocity",                     (xmethod_t)Gsc_Player_Velocity_Add,              qfalse);
+
+    Scr_AddFunction("vectorscale",         Gsc_Utils_VectorScale,                 qfalse);
 }
 
 static void VCJ_onConnect(scr_entref_t id)
@@ -500,6 +506,75 @@ void Gsc_Player_switchToWeaponSeamless(int id)
             SV_GameSendServerCommand(id, 1, va("%c %i", 'a', weaponIdx));
         }
     }
+}
+
+void Gsc_Player_SetPMFlags(int id)
+{
+    int numParams = Scr_GetNumParam();
+    const char *szSyntax = "expected 1-2 arguments: <pm_flags> [pm_time]";
+    if ((numParams < 1) || (numParams > 2))
+    {
+        Scr_ObjectError(szSyntax);
+        return;
+    }
+
+    int flags = Scr_GetInt(0);
+
+    int time = Scr_GetInt(1);
+
+    playerState_t *ps = SV_GameClientNum(id);
+
+    if (ps != NULL)
+    {
+        ps->pm_flags = flags;
+        if (numParams > 1)
+        {
+            ps->pm_time = time;
+        }
+    }
+}
+
+void Gsc_Player_GetPMFlags(int id)
+{
+    playerState_t *ps = SV_GameClientNum(id);
+    Scr_AddInt(ps->pm_flags);
+}
+
+void Gsc_Player_GetPMTime(int id)
+{
+    playerState_t *ps = SV_GameClientNum(id);
+    Scr_AddInt(ps->pm_time);
+}
+
+void Gsc_Player_Velocity_Add(int id)
+{
+    vec3_t velocity;
+    Scr_GetVector(0, velocity);
+
+    playerState_t *ps = SV_GameClientNum(id);
+    if (ps)
+    {
+        ps->velocity[0] += velocity[0];
+        ps->velocity[1] += velocity[1];
+        ps->velocity[2] += velocity[2];
+        Scr_AddInt(1);
+    }
+    else
+    {
+        Scr_AddInt(0);
+    }
+}
+
+void Gsc_Utils_VectorScale()
+{
+    vec3_t vector;
+    Scr_GetVector(0, vector);
+    float scale = Scr_GetFloat(1);
+
+    vector[0] *= scale;
+    vector[1] *= scale;
+    vector[2] *= scale;
+    Scr_AddVector(vector);
 }
 
 

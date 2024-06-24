@@ -583,11 +583,6 @@ void Scr_AddStockMethods()
 	Scr_AddMethod("holdbreathbuttonpressed", PlayerCmd_HoldBreathButtonPressed, 0);
 	Scr_AddMethod("aimbuttonpressed", PlayerCmd_AimButtonPressed, 0);
 
-	// Values used for player bounce detection
-	Scr_AddMethod("getPmFlags", PlayerCmd_GetPmFlags, 0);
-	Scr_AddMethod("getJumpTime", PlayerCmd_GetJumpTime, 0);
-	Scr_AddMethod("getJumpOriginZ", PlayerCmd_GetJumpOriginZ, 0);
-
 	Scr_AddMethod("steamgroupmembershipquery", PlayerCmd_GetSteamGroupMembership, 0);
 	Scr_AddMethod("setvelocity", PlayerCmd_SetVelocity, qfalse);
 

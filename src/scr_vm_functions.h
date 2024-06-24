@@ -53,9 +53,6 @@ void PlayerCmd_GetCountedFPS(scr_entref_t arg);
 void PlayerCmd_GetSpectatorClient(scr_entref_t arg);
 void PlayerCmd_SetVelocity(scr_entref_t arg);
 
-void PlayerCmd_GetPmFlags(scr_entref_t object);
-void PlayerCmd_GetJumpTime(scr_entref_t object);
-void PlayerCmd_GetJumpOriginZ(scr_entref_t object);
 void PlayerCmd_ForwardButtonPressed(scr_entref_t object);
 void PlayerCmd_BackButtonPressed(scr_entref_t object);
 void PlayerCmd_MoveLeftButtonPressed(scr_entref_t object);
