@@ -47,6 +47,7 @@ void Ext_RPGFiredCallback(gentity_t *, gentity_t *);
 int Ext_IsPlayerAllowedToEle(struct pmove_t *);
 void Ext_PlayerTryingToEle(struct pmove_t *);
 void Ext_PlayerNotEle(struct pmove_t *);
+void Ext_PM_AirMove(struct pmove_t *pmove, struct pml_t *pml);
 
 void Gsc_Player_setOriginAndAngles(int id);
 void Gsc_Player_switchToWeaponSeamless(int id);

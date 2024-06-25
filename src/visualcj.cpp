@@ -59,6 +59,7 @@ static bool VCJ_isPlayerElevating[MAX_CLIENTS] = {0};
 
 // Per Player HB
 static bool VCJ_playerHalfbeatPermissions[MAX_CLIENTS] = {0};
+static int VCJ_PlayerPrevServerTime[MAX_CLIENTS] = {0};
 
 // Allow WASD
 static bool VCJ_playerWASDCallbackEnabled[MAX_CLIENTS] = {0};
@@ -66,6 +67,9 @@ static bool VCJ_playerWASDCallbackEnabled[MAX_CLIENTS] = {0};
 // For button monitoring
 static int VCJ_previousButtons[MAX_CLIENTS] = {0};
 static playermovement_t VCJ_playerMovement[MAX_CLIENTS] = {{0}};
+
+//Sliding on slope monitoring
+static bool VCJ_PlayerSliding[MAX_CLIENTS] = {0};
 
 // Ground monitoring
 bool VCJ_clientOnGround[MAX_CLIENTS];
@@ -78,6 +82,7 @@ static float VCJ_clientMaxHeight[MAX_CLIENTS] = {0};
 //Hb monitoring
 static float VCJ_xvel[MAX_CLIENTS];
 static float VCJ_yvel[MAX_CLIENTS];
+static float VCJ_zvel[MAX_CLIENTS];
 
 // For client FPS calculation
 static int VCJ_clientFrameTimes[MAX_CLIENTS][NR_SAMPLES_FPS_AVERAGING] = {{0}}; // Client frame times storage, per client, with x samples
@@ -247,6 +252,7 @@ void VCJ_beforeClientMoveCommand(client_t *client, usercmd_t *ucmd)
 
     VCJ_xvel[client - svs.clients] = client->gentity->client->ps.velocity[0];
     VCJ_yvel[client - svs.clients] = client->gentity->client->ps.velocity[1];
+    VCJ_zvel[client - svs.clients] = client->gentity->client->ps.velocity[2];
 }
 
 void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
@@ -273,45 +279,52 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
     // When spectating, client->gentity is the person you're spectating. We don't want reporting for them!
     if (gclient->sess.sessionState == SESS_STATE_PLAYING)
     {
+        bool isOnGround = (gclient->ps.groundEntityNum != 1023);
         //---- 2. Player HB determination
-        if(fabs(VCJ_xvel[clientNum]) < fabs(client->gentity->client->ps.velocity[0]) && fabs(client->gentity->client->ps.velocity[0]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
-        {
-            //posssible hb in x dir
-            if(!VCJ_playerHalfbeatPermissions[clientNum])
-            {
-                client->gentity->client->ps.velocity[0] = VCJ_xvel[clientNum];
-            }
 
-            int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
-            if(callback)
-            {
-                Scr_AddInt(ucmd->serverTime);
-                gentity_t *ent = SV_GentityNum(clientNum);
-                int threadId = Scr_ExecEntThread(ent, callback, 1);
-                Scr_FreeThread(threadId);
-            }
-        }
-        if(fabs(VCJ_yvel[clientNum]) < fabs(client->gentity->client->ps.velocity[1]) && fabs(client->gentity->client->ps.velocity[1]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
-        {
-            //posssible hb in x dir
-            if(!VCJ_playerHalfbeatPermissions[clientNum])
-            {
-                client->gentity->client->ps.velocity[1] = VCJ_yvel[clientNum];
-            }
+        int frametime = ucmd->serverTime - VCJ_PlayerPrevServerTime[clientNum];
+        int accel = round((float)(frametime * g_gravity->current.floatval) * 0.001);
 
-            int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
-            if(callback)
+        if(VCJ_zvel[clientNum] - gclient->ps.velocity[2] == accel)
+        {
+            if(fabs(VCJ_xvel[clientNum]) < fabs(gclient->ps.velocity[0]) && fabs(gclient->ps.velocity[0]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
             {
-                Scr_AddInt(ucmd->serverTime);
-                gentity_t *ent = SV_GentityNum(clientNum);
-                int threadId = Scr_ExecEntThread(ent, callback, 1);
-                Scr_FreeThread(threadId);
+                //posssible hb in x dir
+                if(!VCJ_playerHalfbeatPermissions[clientNum])
+                {
+                    gclient->ps.velocity[0] = VCJ_xvel[clientNum];
+                }
+
+                int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
+                if(callback)
+                {
+                    Scr_AddInt(ucmd->serverTime);
+                    gentity_t *ent = SV_GentityNum(clientNum);
+                    int threadId = Scr_ExecEntThread(ent, callback, 1);
+                    Scr_FreeThread(threadId);
+                }
+            }
+            if(fabs(VCJ_yvel[clientNum]) < fabs(gclient->ps.velocity[1]) && fabs(gclient->ps.velocity[1]) > 300 && ucmd->forwardmove == 0 && (ucmd->rightmove == -127 || ucmd->rightmove == 127))
+            {
+                //posssible hb in x dir
+                if(!VCJ_playerHalfbeatPermissions[clientNum])
+                {
+                    gclient->ps.velocity[1] = VCJ_yvel[clientNum];
+                }
+
+                int callback = VCJ_callbacks[VCJ_CB_PLAYER_HB];
+                if(callback)
+                {
+                    Scr_AddInt(ucmd->serverTime);
+                    gentity_t *ent = SV_GentityNum(clientNum);
+                    int threadId = Scr_ExecEntThread(ent, callback, 1);
+                    Scr_FreeThread(threadId);
+                }
             }
         }
 
 
         // 3. onGround reporting
-        bool isOnGround = (gclient->ps.groundEntityNum != 1023);
         if (isOnGround != VCJ_clientOnGround[clientNum])
         {
             VCJ_clientOnGround[clientNum] = isOnGround;
@@ -360,6 +373,7 @@ void VCJ_onClientMoveCommand(client_t *client, usercmd_t *ucmd)
         VCJ_clientBouncePrevVelocity[clientNum] = gclient->ps.velocity[2];
         // And the maximum height they reached
         VCJ_clientMaxHeight[clientNum] = std::fmax(gclient->ps.origin[2], VCJ_clientMaxHeight[clientNum]);
+        VCJ_PlayerPrevServerTime[clientNum] = ucmd->serverTime;
     }
 }
 
@@ -642,6 +656,20 @@ void Ext_PlayerNotEle(struct pmove_t *pmove)
     {
         VCJ_isPlayerElevating[pmove->ps->clientNum] = false;
     }
+}
+
+void Ext_PM_AirMove(struct pmove_t *pmove, struct pml_t *pml)
+{
+	int clientNum = pmove->ps->clientNum;
+
+	if (pml->groundTrace.normal[2] > .3f && pml->groundTrace.normal[2] < .7f)
+	{
+	    VCJ_PlayerSliding[clientNum] = true;
+	}
+	else
+	{
+	    VCJ_PlayerSliding[clientNum] = false;
+	}
 }
 
 #ifdef __cplusplus

@@ -88,6 +88,7 @@
 	extern G_PlayerEvent
 	extern Ext_IsPlayerAllowedToEle
 	extern Ext_PlayerNotEle
+	extern Ext_PM_AirMove
 
 ;Exports of bg_pmove:
 	global viewLerp_CrouchStand
@@ -7401,6 +7402,14 @@ Pmove_1170:
 	lea edx, [ebp-0x108]
 	mov eax, edi
 	call PM_AirMove
+	; Set up arguments for Ext_PM_AirMove
+    ; GPT generated so no trust
+    lea edx, [ebp-0x108]     ; Load the address of [ebp-0x108] into edx
+    push edx                 ; Push the address onto the stack (second argument)
+    mov eax, edi             ; Move edi into eax
+    push eax                 ; Push edi onto the stack (first argument)
+    call Ext_PM_AirMove      ; Call the external C function
+    add esp, 8               ; Clean up the stack (2 arguments * 4 bytes each)
 Pmove_1860:
 	lea edx, [ebp-0x108]
 	mov eax, edi
